@@ -52,6 +52,9 @@ namespace BL
 
         public int CrearIdioma(string codigo, string nombre, bool esPorDefecto)
         {
+            if (!SessionManager.Instancia.TieneRol("Administrador"))
+                throw new UnauthorizedAccessException("Solo un administrador puede crear idiomas.");
+
             if (string.IsNullOrWhiteSpace(codigo))
                 throw new ArgumentException("El código es obligatorio.", nameof(codigo));
             if (string.IsNullOrWhiteSpace(nombre))

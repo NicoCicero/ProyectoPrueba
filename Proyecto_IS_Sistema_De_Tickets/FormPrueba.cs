@@ -30,6 +30,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
         private bool _puedeGestionarPermisos;
         private bool _puedeGestionarIdiomas;
         private bool? _ultimoEstadoIntegridadOk;
+        private bool _esAdministrador;
 
         private TabPage _tabRegistrar;
         private TabPage _tabBitacora;
@@ -57,6 +58,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             _puedeVerCambios = SessionManager.Instancia.TienePermiso("ControlCambios.Ver");
             _puedeGestionarPermisos = SessionManager.Instancia.TienePermiso("Permiso.Gestionar");
             _puedeGestionarIdiomas = SessionManager.Instancia.TienePermiso("Idioma.Gestionar");
+            _esAdministrador = SessionManager.Instancia.TieneRol("Administrador");
             bool puedeCrearTicket = usuario.TienePermiso("Ticket.Crear");
 
             this.Text = $"FormPrueba - {usuario.Email} (Ticket.Crear={(puedeCrearTicket ? "Sí" : "No")})";
@@ -73,7 +75,10 @@ namespace Proyecto_IS_Sistema_De_Tickets
             if (!_puedeGestionarIdiomas && tabGeneral.TabPages.Contains(tabIdiomas))
                 tabGeneral.TabPages.Remove(tabIdiomas);
             else if (_puedeGestionarIdiomas)
+            {
                 CargarIdiomasAdmin();
+                AplicarRestriccionIdiomas();
+            }
 
             if (_puedeGestionarUsuarios)
             {
@@ -169,6 +174,11 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 btnCrearPermiso.Text = Texto(t, "BTN_PERMISO_CREAR");
                 btnAgregarRelacionPermiso.Text = Texto(t, "BTN_PERMISO_RELACION_AGREGAR");
                 btnQuitarRelacionPermiso.Text = Texto(t, "BTN_PERMISO_RELACION_QUITAR");
+                lblPermisoSimpleRapido.Text = Texto(t, "LBL_PERMISO_SIMPLE", "Permiso simple");
+                lblPermisoAsignarUsuario.Text = Texto(t, "LBL_PERMISO_ASIGNAR_USUARIO", "Asignar a usuario");
+                lblPermisoAsignarRol.Text = Texto(t, "LBL_PERMISO_ASIGNAR_ROL", "Asignar a rol");
+                btnAsignarPermisoAUsuario.Text = Texto(t, "BTN_PERMISO_ASIGNAR_USUARIO", "Asignar al usuario");
+                btnAsignarPermisoARol.Text = Texto(t, "BTN_PERMISO_ASIGNAR_ROL", "Asignar al rol");
             }
 
             if (tabGeneral.TabPages.Contains(tabIdiomas))
@@ -191,11 +201,11 @@ namespace Proyecto_IS_Sistema_De_Tickets
             btnRecalcularIntegridad.Text = Texto(t, "BTN_RECALCULAR_INTEGRIDAD");
         }
 
-        private string Texto(Dictionary<string, string> dic, string clave)
+        private string Texto(Dictionary<string, string> dic, string clave, string fallback = null)
         {
             if (dic != null && dic.TryGetValue(clave, out var valor))
                 return valor;
-            return $"[{clave}]";
+            return fallback ?? $"[{clave}]";
         }
 
         private void btnCerrarSesion_Click(object sender, EventArgs e)
@@ -265,6 +275,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 }
 
                 CargarIdiomasAdmin();
+                AplicarRestriccionIdiomas();
             }
         }
         private void CargarCambiosInicial()
@@ -377,8 +388,13 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 ? null
                 : txtTexto.Text.Trim();
 
-            var desdeUtc = DateTime.SpecifyKind(dtpDesde.Value.Date, DateTimeKind.Local).ToUniversalTime();
-            var hastaUtcExcl = DateTime.SpecifyKind(dtpHasta.Value.Date.AddDays(1), DateTimeKind.Local).ToUniversalTime();
+            DateTime desdeLocal = dtpDesde.Value.Date;
+            DateTime hastaLocal = dtpHasta.Value.Date;
+            if (!ValidarRangoFechas(desdeLocal, hastaLocal, "la bitácora"))
+                return;
+
+            var desdeUtc = DateTime.SpecifyKind(desdeLocal, DateTimeKind.Local).ToUniversalTime();
+            var hastaUtcExcl = DateTime.SpecifyKind(hastaLocal.AddDays(1), DateTimeKind.Local).ToUniversalTime();
 
             var repo = new AuditoriaRepository();
             var datos = repo.FiltrarAuditoria(id, usuarioId, evento, texto, desdeUtc, hastaUtcExcl);
@@ -396,27 +412,24 @@ namespace Proyecto_IS_Sistema_De_Tickets
         {
             txtAuditoriaId.Clear();
             txtId.Clear();
-            cmbEvento.SelectedIndex = -1; // vacío
+            if (cmbEvento.Items.Count > 0)
+                cmbEvento.SelectedIndex = 0;
+            else
+                cmbEvento.SelectedIndex = -1;
             txtTexto.Clear();
-            dtpDesde.Value = new DateTime(2000, 1, 1);
-            dtpHasta.Value = DateTime.Today.AddDays(1);
 
-            // defaults de fechas (sin “limitar”)
-            dtpDesde.Value = new DateTime(2000, 1, 1);
-            dtpHasta.Value = DateTime.Today.AddDays(1);
+            CargarBitacoraInicial();
+        }
 
-            // carga inicial (sin filtros de texto)
-            var repoInit = new AuditoriaRepository();
-            dgvBitacora.AutoGenerateColumns = true;
-            dgvBitacora.DataSource = repoInit.FiltrarAuditoria(
-                id: null,
-                usuarioId: null,
-                evento: null,
-                texto: null,
-                desdeUtc: DateTime.SpecifyKind(dtpDesde.Value.Date, DateTimeKind.Local).ToUniversalTime(),
-                hastaUtcExcl: DateTime.SpecifyKind(dtpHasta.Value.Date.AddDays(1), DateTimeKind.Local).ToUniversalTime()
-            );
+        private bool ValidarRangoFechas(DateTime desde, DateTime hasta, string contexto)
+        {
+            if (desde > hasta)
+            {
+                MessageBox.Show($"La fecha 'desde' no puede ser posterior a la fecha 'hasta' en {contexto}.");
+                return false;
+            }
 
+            return true;
         }
         private bool _eventosCargados = false;
 
@@ -522,14 +535,19 @@ namespace Proyecto_IS_Sistema_De_Tickets
 
         private void btnFiltrarCambios_Click(object sender, EventArgs e)
         {
-            int? id = int.TryParse(txtCambioUsuarioId.Text, out var vId) ? vId : (int?)null;
-            int? usuarioId = int.TryParse(txtCambioId.Text, out var vUid) ? vUid : (int?)null;
+            int? id = int.TryParse(txtCambioId.Text, out var vId) ? vId : (int?)null;
+            int? usuarioId = int.TryParse(txtCambioUsuarioId.Text, out var vUid) ? vUid : (int?)null;
             string entidad = string.IsNullOrWhiteSpace(txtCambioEntidad.Text) ? null : txtCambioEntidad.Text.Trim();
             int? entidadId = int.TryParse(txtCambioEntidadId.Text, out var vEid) ? vEid : (int?)null;
             string campo = string.IsNullOrWhiteSpace(txtCambioCampo.Text) ? null : txtCambioCampo.Text.Trim();
 
-            var desdeUtc = DateTime.SpecifyKind(dtpCambiosDesde.Value.Date, DateTimeKind.Local).ToUniversalTime();
-            var hastaUtc = DateTime.SpecifyKind(dtpCambiosHasta.Value.Date.AddDays(1), DateTimeKind.Local).ToUniversalTime();
+            DateTime desdeLocal = dtpCambiosDesde.Value.Date;
+            DateTime hastaLocal = dtpCambiosHasta.Value.Date;
+            if (!ValidarRangoFechas(desdeLocal, hastaLocal, "el control de cambios"))
+                return;
+
+            var desdeUtc = DateTime.SpecifyKind(desdeLocal, DateTimeKind.Local).ToUniversalTime();
+            var hastaUtc = DateTime.SpecifyKind(hastaLocal.AddDays(1), DateTimeKind.Local).ToUniversalTime();
 
             var repo = new ControlCambiosRepository();
             var datos = repo.FiltrarCambios(
@@ -542,7 +560,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 hastaUtcExcl: hastaUtc
             );
 
-            dgvCambios.AutoGenerateColumns = true;
+            dgvCambios.AutoGenerateColumns = false;
             dgvCambios.DataSource = datos;
         }
 
@@ -787,6 +805,68 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 txtPermisoNombre.Clear();
                 chkPermisoEsCompuesto.Checked = false;
             }
+
+            CargarAsignacionPermisosRapidos();
+        }
+
+        private void CargarAsignacionPermisosRapidos()
+        {
+            if (cmbPermisoSimpleRapido == null)
+                return;
+
+            var simples = _permisosPlanos
+                .Where(p => !p.EsCompuesto)
+                .OrderBy(p => p.Nombre)
+                .Select(p => new BE.PermisoComposite { Id = p.Id, Nombre = p.Nombre, EsCompuesto = p.EsCompuesto })
+                .ToList();
+
+            cmbPermisoSimpleRapido.DisplayMember = "Nombre";
+            cmbPermisoSimpleRapido.ValueMember = "Id";
+            cmbPermisoSimpleRapido.DataSource = simples;
+
+            if (cmbUsuarioAsignarPermiso != null && btnAsignarPermisoAUsuario != null)
+            {
+                try
+                {
+                    var usuarios = BL.UserAdminService.Instancia.ListarUsuarios()
+                        .Select(u => new { u.Id, Descripcion = $"{u.Nombre} ({u.Email})" })
+                        .OrderBy(u => u.Descripcion)
+                        .ToList();
+                    cmbUsuarioAsignarPermiso.DisplayMember = "Descripcion";
+                    cmbUsuarioAsignarPermiso.ValueMember = "Id";
+                    cmbUsuarioAsignarPermiso.DataSource = usuarios;
+                    cmbUsuarioAsignarPermiso.Enabled = usuarios.Count > 0;
+                    btnAsignarPermisoAUsuario.Enabled = usuarios.Count > 0;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    cmbUsuarioAsignarPermiso.DataSource = null;
+                    cmbUsuarioAsignarPermiso.Enabled = false;
+                    btnAsignarPermisoAUsuario.Enabled = false;
+                }
+            }
+
+            if (cmbRolAsignarPermiso != null && btnAsignarPermisoARol != null)
+            {
+                try
+                {
+                    var roles = BL.UserAdminService.Instancia.ListarRoles()
+                        .Select(r => new { r.Id, Descripcion = r.Nombre })
+                        .OrderBy(r => r.Descripcion)
+                        .ToList();
+                    cmbRolAsignarPermiso.DisplayMember = "Descripcion";
+                    cmbRolAsignarPermiso.ValueMember = "Id";
+                    cmbRolAsignarPermiso.DataSource = roles;
+                    cmbRolAsignarPermiso.Enabled = roles.Count > 0;
+                    btnAsignarPermisoARol.Enabled = roles.Count > 0;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    cmbRolAsignarPermiso.DataSource = null;
+                    cmbRolAsignarPermiso.Enabled = false;
+                    btnAsignarPermisoARol.Enabled = false;
+                }
+            }
         }
 
         private void MostrarPermisoSeleccionado(int permisoId)
@@ -925,10 +1005,65 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 RefrescarPermisosAdministrables();
                 CargarRolesYPermisosDisponibles();
                 CargarUsuariosConPermisos();
+                if (!esCompuesto && cmbPermisoSimpleRapido != null)
+                    cmbPermisoSimpleRapido.SelectedValue = id;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error al crear permiso: " + ex.Message);
+            }
+        }
+
+        private void btnAsignarPermisoAUsuario_Click(object sender, EventArgs e)
+        {
+            if (!(cmbPermisoSimpleRapido?.SelectedValue is int permisoId))
+            {
+                MessageBox.Show("Seleccioná un permiso simple.");
+                return;
+            }
+
+            if (!(cmbUsuarioAsignarPermiso?.SelectedValue is int usuarioId))
+            {
+                MessageBox.Show("Seleccioná un usuario.");
+                return;
+            }
+
+            try
+            {
+                BL.PermisoService.Instancia.AsignarPermisoDirectoUsuario(usuarioId, permisoId);
+                MessageBox.Show("Permiso asignado al usuario.");
+                CargarUsuariosConPermisos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No se pudo asignar el permiso: " + ex.Message);
+            }
+        }
+
+        private void btnAsignarPermisoARol_Click(object sender, EventArgs e)
+        {
+            if (!(cmbPermisoSimpleRapido?.SelectedValue is int permisoId))
+            {
+                MessageBox.Show("Seleccioná un permiso simple.");
+                return;
+            }
+
+            if (!(cmbRolAsignarPermiso?.SelectedValue is int rolId))
+            {
+                MessageBox.Show("Seleccioná un rol.");
+                return;
+            }
+
+            try
+            {
+                BL.PermisoService.Instancia.AsignarPermisoARol(rolId, permisoId);
+                MessageBox.Show("Permiso asignado al rol.");
+                CargarRolesYPermisosDisponibles();
+                CargarUsuariosConPermisos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No se pudo asignar el permiso al rol: " + ex.Message);
             }
         }
 
@@ -1193,6 +1328,17 @@ namespace Proyecto_IS_Sistema_De_Tickets
             }
         }
 
+        private void AplicarRestriccionIdiomas()
+        {
+            bool habilitado = _esAdministrador;
+            if (btnCrearIdioma != null)
+                btnCrearIdioma.Enabled = habilitado;
+            if (btnNuevoIdioma != null)
+                btnNuevoIdioma.Enabled = habilitado;
+            if (txtIdiomaCodigo != null)
+                txtIdiomaCodigo.Enabled = habilitado;
+        }
+
         private void MostrarIdiomaSeleccionado()
         {
             if (dgvIdiomasAdmin?.CurrentRow == null)
@@ -1271,6 +1417,12 @@ namespace Proyecto_IS_Sistema_De_Tickets
 
         private void btnCrearIdioma_Click(object sender, EventArgs e)
         {
+            if (!_esAdministrador)
+            {
+                MessageBox.Show("Solo un administrador puede crear idiomas.");
+                return;
+            }
+
             string codigo = txtIdiomaCodigo.Text.Trim();
             string nombre = txtIdiomaNombre.Text.Trim();
             bool esPorDefecto = chkIdiomaPorDefecto.Checked;
@@ -1326,6 +1478,12 @@ namespace Proyecto_IS_Sistema_De_Tickets
 
         private void btnNuevoIdioma_Click(object sender, EventArgs e)
         {
+            if (!_esAdministrador)
+            {
+                MessageBox.Show("Solo un administrador puede crear idiomas.");
+                return;
+            }
+
             dgvIdiomasAdmin?.ClearSelection();
             lblIdiomaSeleccionadoAdmin.Tag = null;
             var ultima = IdiomaManager.Instancia.ObtenerUltimaTraduccion();

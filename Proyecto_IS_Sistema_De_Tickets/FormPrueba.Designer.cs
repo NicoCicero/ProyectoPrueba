@@ -474,7 +474,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblCambioCampo.Name = "lblCambioCampo";
             this.lblCambioCampo.Size = new System.Drawing.Size(78, 13);
             this.lblCambioCampo.TabIndex = 35;
-            this.lblCambioCampo.Text = "Cambio Campo";
+            this.lblCambioCampo.Text = "Campo modificado";
             // 
             // txtCambioCampo
             // 
@@ -509,7 +509,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblCambioFecha.Name = "lblCambioFecha";
             this.lblCambioFecha.Size = new System.Drawing.Size(37, 13);
             this.lblCambioFecha.TabIndex = 31;
-            this.lblCambioFecha.Text = "Fecha";
+            this.lblCambioFecha.Text = "Rango de fechas";
             // 
             // lblCambioEntidadId
             // 
@@ -518,7 +518,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblCambioEntidadId.Name = "lblCambioEntidadId";
             this.lblCambioEntidadId.Size = new System.Drawing.Size(87, 13);
             this.lblCambioEntidadId.TabIndex = 30;
-            this.lblCambioEntidadId.Text = "Cambio Entida Id";
+            this.lblCambioEntidadId.Text = "ID de entidad";
             // 
             // lblCambioEntidad
             // 
@@ -527,7 +527,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblCambioEntidad.Name = "lblCambioEntidad";
             this.lblCambioEntidad.Size = new System.Drawing.Size(81, 13);
             this.lblCambioEntidad.TabIndex = 29;
-            this.lblCambioEntidad.Text = "Cambio Entidad";
+            this.lblCambioEntidad.Text = "Entidad";
             // 
             // lblCambioId
             // 
@@ -536,7 +536,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblCambioId.Name = "lblCambioId";
             this.lblCambioId.Size = new System.Drawing.Size(54, 13);
             this.lblCambioId.TabIndex = 28;
-            this.lblCambioId.Text = "Cambio Id";
+            this.lblCambioId.Text = "ID de cambio";
             // 
             // lblCambioUsuarioId
             // 
@@ -545,7 +545,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblCambioUsuarioId.Name = "lblCambioUsuarioId";
             this.lblCambioUsuarioId.Size = new System.Drawing.Size(55, 13);
             this.lblCambioUsuarioId.TabIndex = 27;
-            this.lblCambioUsuarioId.Text = "Usuario Id";
+            this.lblCambioUsuarioId.Text = "ID de usuario";
             // 
             // txtCambioId
             // 
@@ -626,9 +626,17 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.tabPermisos.TabIndex = 4;
             this.tabPermisos.Text = "Permisos";
             this.tabPermisos.UseVisualStyleBackColor = true;
-            //
+            // 
             // grpPermisosAdmin
-            //
+            // 
+            this.grpPermisosAdmin.Controls.Add(this.btnAsignarPermisoARol);
+            this.grpPermisosAdmin.Controls.Add(this.btnAsignarPermisoAUsuario);
+            this.grpPermisosAdmin.Controls.Add(this.cmbRolAsignarPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.cmbUsuarioAsignarPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.cmbPermisoSimpleRapido);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoAsignarRol);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoAsignarUsuario);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoSimpleRapido);
             this.grpPermisosAdmin.Controls.Add(this.btnQuitarRelacionPermiso);
             this.grpPermisosAdmin.Controls.Add(this.btnAgregarRelacionPermiso);
             this.grpPermisosAdmin.Controls.Add(this.btnCrearPermiso);
@@ -645,49 +653,123 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.grpPermisosAdmin.Controls.Add(this.lblPermisoNombre);
             this.grpPermisosAdmin.Controls.Add(this.lblPermisoExistente);
             this.grpPermisosAdmin.Controls.Add(this.cmbPermisosExistentes);
-            this.grpPermisosAdmin.Location = new System.Drawing.Point(3, 210);
+            this.grpPermisosAdmin.Location = new System.Drawing.Point(3, 169);
             this.grpPermisosAdmin.Name = "grpPermisosAdmin";
-            this.grpPermisosAdmin.Size = new System.Drawing.Size(754, 170);
+            this.grpPermisosAdmin.Size = new System.Drawing.Size(754, 211);
             this.grpPermisosAdmin.TabIndex = 5;
             this.grpPermisosAdmin.TabStop = false;
             this.grpPermisosAdmin.Text = "Gestión de permisos";
-            //
+            // 
+            // btnAsignarPermisoARol
+            // 
+            this.btnAsignarPermisoARol.Location = new System.Drawing.Point(528, 179);
+            this.btnAsignarPermisoARol.Name = "btnAsignarPermisoARol";
+            this.btnAsignarPermisoARol.Size = new System.Drawing.Size(160, 23);
+            this.btnAsignarPermisoARol.TabIndex = 21;
+            this.btnAsignarPermisoARol.Text = "Asignar al rol";
+            this.btnAsignarPermisoARol.UseVisualStyleBackColor = true;
+            this.btnAsignarPermisoARol.Click += new System.EventHandler(this.btnAsignarPermisoARol_Click);
+            // 
+            // btnAsignarPermisoAUsuario
+            // 
+            this.btnAsignarPermisoAUsuario.Location = new System.Drawing.Point(528, 149);
+            this.btnAsignarPermisoAUsuario.Name = "btnAsignarPermisoAUsuario";
+            this.btnAsignarPermisoAUsuario.Size = new System.Drawing.Size(160, 23);
+            this.btnAsignarPermisoAUsuario.TabIndex = 20;
+            this.btnAsignarPermisoAUsuario.Text = "Asignar al usuario";
+            this.btnAsignarPermisoAUsuario.UseVisualStyleBackColor = true;
+            this.btnAsignarPermisoAUsuario.Click += new System.EventHandler(this.btnAsignarPermisoAUsuario_Click);
+            // 
+            // cmbRolAsignarPermiso
+            // 
+            this.cmbRolAsignarPermiso.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRolAsignarPermiso.FormattingEnabled = true;
+            this.cmbRolAsignarPermiso.Location = new System.Drawing.Point(150, 181);
+            this.cmbRolAsignarPermiso.Name = "cmbRolAsignarPermiso";
+            this.cmbRolAsignarPermiso.Size = new System.Drawing.Size(188, 21);
+            this.cmbRolAsignarPermiso.TabIndex = 19;
+            // 
+            // cmbUsuarioAsignarPermiso
+            // 
+            this.cmbUsuarioAsignarPermiso.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbUsuarioAsignarPermiso.FormattingEnabled = true;
+            this.cmbUsuarioAsignarPermiso.Location = new System.Drawing.Point(150, 151);
+            this.cmbUsuarioAsignarPermiso.Name = "cmbUsuarioAsignarPermiso";
+            this.cmbUsuarioAsignarPermiso.Size = new System.Drawing.Size(188, 21);
+            this.cmbUsuarioAsignarPermiso.TabIndex = 18;
+            // 
+            // cmbPermisoSimpleRapido
+            // 
+            this.cmbPermisoSimpleRapido.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPermisoSimpleRapido.FormattingEnabled = true;
+            this.cmbPermisoSimpleRapido.Location = new System.Drawing.Point(150, 121);
+            this.cmbPermisoSimpleRapido.Name = "cmbPermisoSimpleRapido";
+            this.cmbPermisoSimpleRapido.Size = new System.Drawing.Size(188, 21);
+            this.cmbPermisoSimpleRapido.TabIndex = 17;
+            // 
+            // lblPermisoAsignarRol
+            // 
+            this.lblPermisoAsignarRol.AutoSize = true;
+            this.lblPermisoAsignarRol.Location = new System.Drawing.Point(10, 184);
+            this.lblPermisoAsignarRol.Name = "lblPermisoAsignarRol";
+            this.lblPermisoAsignarRol.Size = new System.Drawing.Size(69, 13);
+            this.lblPermisoAsignarRol.TabIndex = 16;
+            this.lblPermisoAsignarRol.Text = "Asignar a rol";
+            // 
+            // lblPermisoAsignarUsuario
+            // 
+            this.lblPermisoAsignarUsuario.AutoSize = true;
+            this.lblPermisoAsignarUsuario.Location = new System.Drawing.Point(10, 154);
+            this.lblPermisoAsignarUsuario.Name = "lblPermisoAsignarUsuario";
+            this.lblPermisoAsignarUsuario.Size = new System.Drawing.Size(90, 13);
+            this.lblPermisoAsignarUsuario.TabIndex = 15;
+            this.lblPermisoAsignarUsuario.Text = "Asignar a usuario";
+            // 
+            // lblPermisoSimpleRapido
+            // 
+            this.lblPermisoSimpleRapido.AutoSize = true;
+            this.lblPermisoSimpleRapido.Location = new System.Drawing.Point(10, 124);
+            this.lblPermisoSimpleRapido.Name = "lblPermisoSimpleRapido";
+            this.lblPermisoSimpleRapido.Size = new System.Drawing.Size(77, 13);
+            this.lblPermisoSimpleRapido.TabIndex = 14;
+            this.lblPermisoSimpleRapido.Text = "Permiso simple";
+            // 
             // btnQuitarRelacionPermiso
-            //
-            this.btnQuitarRelacionPermiso.Location = new System.Drawing.Point(528, 130);
+            // 
+            this.btnQuitarRelacionPermiso.Location = new System.Drawing.Point(528, 112);
             this.btnQuitarRelacionPermiso.Name = "btnQuitarRelacionPermiso";
             this.btnQuitarRelacionPermiso.Size = new System.Drawing.Size(160, 23);
-            this.btnQuitarRelacionPermiso.TabIndex = 15;
+            this.btnQuitarRelacionPermiso.TabIndex = 13;
             this.btnQuitarRelacionPermiso.Text = "Quitar relación";
             this.btnQuitarRelacionPermiso.UseVisualStyleBackColor = true;
             this.btnQuitarRelacionPermiso.Click += new System.EventHandler(this.btnQuitarRelacionPermiso_Click);
-            //
+            // 
             // btnAgregarRelacionPermiso
-            //
-            this.btnAgregarRelacionPermiso.Location = new System.Drawing.Point(528, 100);
+            // 
+            this.btnAgregarRelacionPermiso.Location = new System.Drawing.Point(528, 82);
             this.btnAgregarRelacionPermiso.Name = "btnAgregarRelacionPermiso";
             this.btnAgregarRelacionPermiso.Size = new System.Drawing.Size(160, 23);
-            this.btnAgregarRelacionPermiso.TabIndex = 14;
+            this.btnAgregarRelacionPermiso.TabIndex = 12;
             this.btnAgregarRelacionPermiso.Text = "Agregar relación";
             this.btnAgregarRelacionPermiso.UseVisualStyleBackColor = true;
             this.btnAgregarRelacionPermiso.Click += new System.EventHandler(this.btnAgregarRelacionPermiso_Click);
-            //
+            // 
             // btnCrearPermiso
-            //
-            this.btnCrearPermiso.Location = new System.Drawing.Point(528, 66);
+            // 
+            this.btnCrearPermiso.Location = new System.Drawing.Point(528, 52);
             this.btnCrearPermiso.Name = "btnCrearPermiso";
             this.btnCrearPermiso.Size = new System.Drawing.Size(160, 23);
-            this.btnCrearPermiso.TabIndex = 13;
+            this.btnCrearPermiso.TabIndex = 11;
             this.btnCrearPermiso.Text = "Crear permiso";
             this.btnCrearPermiso.UseVisualStyleBackColor = true;
             this.btnCrearPermiso.Click += new System.EventHandler(this.btnCrearPermiso_Click);
-            //
+            // 
             // btnActualizarPermiso
-            //
-            this.btnActualizarPermiso.Location = new System.Drawing.Point(528, 32);
+            // 
+            this.btnActualizarPermiso.Location = new System.Drawing.Point(528, 22);
             this.btnActualizarPermiso.Name = "btnActualizarPermiso";
             this.btnActualizarPermiso.Size = new System.Drawing.Size(160, 23);
-            this.btnActualizarPermiso.TabIndex = 12;
+            this.btnActualizarPermiso.TabIndex = 10;
             this.btnActualizarPermiso.Text = "Guardar cambios";
             this.btnActualizarPermiso.UseVisualStyleBackColor = true;
             this.btnActualizarPermiso.Click += new System.EventHandler(this.btnActualizarPermiso_Click);
@@ -716,65 +798,65 @@ namespace Proyecto_IS_Sistema_De_Tickets
             //
             this.cmbPermisoHijo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbPermisoHijo.FormattingEnabled = true;
-            this.cmbPermisoHijo.Location = new System.Drawing.Point(150, 130);
+            this.cmbPermisoHijo.Location = new System.Drawing.Point(150, 92);
             this.cmbPermisoHijo.Name = "cmbPermisoHijo";
             this.cmbPermisoHijo.Size = new System.Drawing.Size(188, 21);
             this.cmbPermisoHijo.TabIndex = 9;
-            //
+            // 
             // cmbPermisoPadre
-            //
+            // 
             this.cmbPermisoPadre.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbPermisoPadre.FormattingEnabled = true;
-            this.cmbPermisoPadre.Location = new System.Drawing.Point(150, 100);
+            this.cmbPermisoPadre.Location = new System.Drawing.Point(150, 62);
             this.cmbPermisoPadre.Name = "cmbPermisoPadre";
             this.cmbPermisoPadre.Size = new System.Drawing.Size(188, 21);
             this.cmbPermisoPadre.TabIndex = 8;
-            //
+            // 
             // txtNuevoPermisoNombre
-            //
-            this.txtNuevoPermisoNombre.Location = new System.Drawing.Point(150, 68);
+            // 
+            this.txtNuevoPermisoNombre.Location = new System.Drawing.Point(150, 32);
             this.txtNuevoPermisoNombre.Name = "txtNuevoPermisoNombre";
             this.txtNuevoPermisoNombre.Size = new System.Drawing.Size(188, 20);
             this.txtNuevoPermisoNombre.TabIndex = 7;
-            //
+            // 
             // txtPermisoNombre
-            //
-            this.txtPermisoNombre.Location = new System.Drawing.Point(150, 34);
+            // 
+            this.txtPermisoNombre.Location = new System.Drawing.Point(150, 8);
             this.txtPermisoNombre.Name = "txtPermisoNombre";
             this.txtPermisoNombre.Size = new System.Drawing.Size(188, 20);
             this.txtPermisoNombre.TabIndex = 6;
-            //
+            // 
             // lblPermisoHijo
-            //
+            // 
             this.lblPermisoHijo.AutoSize = true;
-            this.lblPermisoHijo.Location = new System.Drawing.Point(10, 133);
+            this.lblPermisoHijo.Location = new System.Drawing.Point(10, 95);
             this.lblPermisoHijo.Name = "lblPermisoHijo";
             this.lblPermisoHijo.Size = new System.Drawing.Size(69, 13);
             this.lblPermisoHijo.TabIndex = 5;
             this.lblPermisoHijo.Text = "Permiso hijo";
-            //
+            // 
             // lblPermisoPadre
-            //
+            // 
             this.lblPermisoPadre.AutoSize = true;
-            this.lblPermisoPadre.Location = new System.Drawing.Point(10, 103);
+            this.lblPermisoPadre.Location = new System.Drawing.Point(10, 65);
             this.lblPermisoPadre.Name = "lblPermisoPadre";
             this.lblPermisoPadre.Size = new System.Drawing.Size(74, 13);
             this.lblPermisoPadre.TabIndex = 4;
             this.lblPermisoPadre.Text = "Permiso padre";
-            //
+            // 
             // lblNuevoPermiso
-            //
+            // 
             this.lblNuevoPermiso.AutoSize = true;
-            this.lblNuevoPermiso.Location = new System.Drawing.Point(10, 71);
+            this.lblNuevoPermiso.Location = new System.Drawing.Point(10, 35);
             this.lblNuevoPermiso.Name = "lblNuevoPermiso";
             this.lblNuevoPermiso.Size = new System.Drawing.Size(82, 13);
             this.lblNuevoPermiso.TabIndex = 3;
             this.lblNuevoPermiso.Text = "Nuevo permiso";
-            //
+            // 
             // lblPermisoNombre
-            //
+            // 
             this.lblPermisoNombre.AutoSize = true;
-            this.lblPermisoNombre.Location = new System.Drawing.Point(10, 37);
+            this.lblPermisoNombre.Location = new System.Drawing.Point(10, 11);
             this.lblPermisoNombre.Name = "lblPermisoNombre";
             this.lblPermisoNombre.Size = new System.Drawing.Size(89, 13);
             this.lblPermisoNombre.TabIndex = 2;
@@ -804,12 +886,12 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.lblUsuarioSel.AutoSize = true;
             this.lblUsuarioSel.Location = new System.Drawing.Point(222, 22);
             this.lblUsuarioSel.Name = "lblUsuarioSel";
-            this.lblUsuarioSel.Size = new System.Drawing.Size(35, 13);
+            this.lblUsuarioSel.Size = new System.Drawing.Size(104, 13);
             this.lblUsuarioSel.TabIndex = 4;
-            this.lblUsuarioSel.Text = "label1";
-            //
+            this.lblUsuarioSel.Text = "Usuario seleccionado";
+            // 
             // btnAsignar
-            //
+            // 
             this.btnAsignar.Location = new System.Drawing.Point(328, 80);
             this.btnAsignar.Name = "btnAsignar";
             this.btnAsignar.Size = new System.Drawing.Size(120, 23);
@@ -832,15 +914,15 @@ namespace Proyecto_IS_Sistema_De_Tickets
             //
             this.treeDisponibles.Location = new System.Drawing.Point(534, 3);
             this.treeDisponibles.Name = "treeDisponibles";
-            this.treeDisponibles.Size = new System.Drawing.Size(223, 200);
+            this.treeDisponibles.Size = new System.Drawing.Size(223, 150);
             this.treeDisponibles.TabIndex = 1;
             this.treeDisponibles.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeDisponibles_AfterSelect);
-            //
+            // 
             // treeUsuarios
-            //
+            // 
             this.treeUsuarios.Location = new System.Drawing.Point(3, 3);
             this.treeUsuarios.Name = "treeUsuarios";
-            this.treeUsuarios.Size = new System.Drawing.Size(223, 200);
+            this.treeUsuarios.Size = new System.Drawing.Size(223, 150);
             this.treeUsuarios.TabIndex = 0;
             this.treeUsuarios.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeUsuarios_AfterSelect_1);
             //
@@ -1146,6 +1228,10 @@ namespace Proyecto_IS_Sistema_De_Tickets
         private System.Windows.Forms.Button btnQuitar;
         private System.Windows.Forms.TreeView treeDisponibles;
         private System.Windows.Forms.GroupBox grpPermisosAdmin;
+        private System.Windows.Forms.ComboBox cmbPermisoSimpleRapido;
+        private System.Windows.Forms.Label lblPermisoAsignarRol;
+        private System.Windows.Forms.Label lblPermisoAsignarUsuario;
+        private System.Windows.Forms.Label lblPermisoSimpleRapido;
         private System.Windows.Forms.Button btnQuitarRelacionPermiso;
         private System.Windows.Forms.Button btnAgregarRelacionPermiso;
         private System.Windows.Forms.Button btnCrearPermiso;
@@ -1162,6 +1248,10 @@ namespace Proyecto_IS_Sistema_De_Tickets
         private System.Windows.Forms.Label lblPermisoNombre;
         private System.Windows.Forms.Label lblPermisoExistente;
         private System.Windows.Forms.ComboBox cmbPermisosExistentes;
+        private System.Windows.Forms.Button btnAsignarPermisoARol;
+        private System.Windows.Forms.Button btnAsignarPermisoAUsuario;
+        private System.Windows.Forms.ComboBox cmbRolAsignarPermiso;
+        private System.Windows.Forms.ComboBox cmbUsuarioAsignarPermiso;
         private System.Windows.Forms.TabPage tabIdiomas;
         private System.Windows.Forms.Button btnNuevaLeyenda;
         private System.Windows.Forms.Button btnGuardarLeyenda;
