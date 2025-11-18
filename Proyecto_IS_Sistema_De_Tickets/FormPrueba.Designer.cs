@@ -75,13 +75,53 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.txtCambioUsuarioId = new System.Windows.Forms.TextBox();
             this.dgvCambios = new System.Windows.Forms.DataGridView();
             this.tabPermisos = new System.Windows.Forms.TabPage();
+            this.grpPermisosAdmin = new System.Windows.Forms.GroupBox();
+            this.btnQuitarRelacionPermiso = new System.Windows.Forms.Button();
+            this.btnAgregarRelacionPermiso = new System.Windows.Forms.Button();
+            this.btnCrearPermiso = new System.Windows.Forms.Button();
+            this.btnActualizarPermiso = new System.Windows.Forms.Button();
+            this.chkNuevoPermisoCompuesto = new System.Windows.Forms.CheckBox();
+            this.chkPermisoEsCompuesto = new System.Windows.Forms.CheckBox();
+            this.cmbPermisoHijo = new System.Windows.Forms.ComboBox();
+            this.cmbPermisoPadre = new System.Windows.Forms.ComboBox();
+            this.txtNuevoPermisoNombre = new System.Windows.Forms.TextBox();
+            this.txtPermisoNombre = new System.Windows.Forms.TextBox();
+            this.lblPermisoHijo = new System.Windows.Forms.Label();
+            this.lblPermisoPadre = new System.Windows.Forms.Label();
+            this.lblNuevoPermiso = new System.Windows.Forms.Label();
+            this.lblPermisoNombre = new System.Windows.Forms.Label();
+            this.lblPermisoExistente = new System.Windows.Forms.Label();
+            this.cmbPermisosExistentes = new System.Windows.Forms.ComboBox();
             this.lblUsuarioSel = new System.Windows.Forms.Label();
             this.btnAsignar = new System.Windows.Forms.Button();
             this.btnQuitar = new System.Windows.Forms.Button();
             this.treeDisponibles = new System.Windows.Forms.TreeView();
             this.treeUsuarios = new System.Windows.Forms.TreeView();
+            this.tabIdiomas = new System.Windows.Forms.TabPage();
+            this.btnNuevaLeyenda = new System.Windows.Forms.Button();
+            this.btnGuardarLeyenda = new System.Windows.Forms.Button();
+            this.txtLeyendaTexto = new System.Windows.Forms.TextBox();
+            this.lblLeyendaTexto = new System.Windows.Forms.Label();
+            this.txtLeyendaDescripcion = new System.Windows.Forms.TextBox();
+            this.lblLeyendaDescripcion = new System.Windows.Forms.Label();
+            this.txtLeyendaClave = new System.Windows.Forms.TextBox();
+            this.lblLeyendaClave = new System.Windows.Forms.Label();
+            this.dgvLeyendas = new System.Windows.Forms.DataGridView();
+            this.btnNuevoIdioma = new System.Windows.Forms.Button();
+            this.btnActualizarIdioma = new System.Windows.Forms.Button();
+            this.btnCrearIdioma = new System.Windows.Forms.Button();
+            this.chkIdiomaPorDefecto = new System.Windows.Forms.CheckBox();
+            this.lblIdiomaPorDefecto = new System.Windows.Forms.Label();
+            this.txtIdiomaNombre = new System.Windows.Forms.TextBox();
+            this.lblIdiomaNombre = new System.Windows.Forms.Label();
+            this.txtIdiomaCodigo = new System.Windows.Forms.TextBox();
+            this.lblIdiomaCodigo = new System.Windows.Forms.Label();
+            this.dgvIdiomasAdmin = new System.Windows.Forms.DataGridView();
+            this.lblIdiomaSeleccionadoAdmin = new System.Windows.Forms.Label();
+            this.lblEstadoIntegridad = new System.Windows.Forms.Label();
+            this.btnVerificarIntegridad = new System.Windows.Forms.Button();
+            this.btnRecalcularIntegridad = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabGeneral.SuspendLayout();
             this.tabMenuPrincipal.SuspendLayout();
@@ -92,6 +132,10 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.tabControlCambios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCambios)).BeginInit();
             this.tabPermisos.SuspendLayout();
+            this.grpPermisosAdmin.SuspendLayout();
+            this.tabIdiomas.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvLeyendas)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvIdiomasAdmin)).BeginInit();
             this.SuspendLayout();
             // 
             // btnCerrarSesion
@@ -118,6 +162,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.tabGeneral.Controls.Add(this.tabBitacora);
             this.tabGeneral.Controls.Add(this.tabControlCambios);
             this.tabGeneral.Controls.Add(this.tabPermisos);
+            this.tabGeneral.Controls.Add(this.tabIdiomas);
             this.tabGeneral.Location = new System.Drawing.Point(9, 2);
             this.tabGeneral.Margin = new System.Windows.Forms.Padding(2);
             this.tabGeneral.Name = "tabGeneral";
@@ -127,7 +172,10 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.tabGeneral.SelectedIndexChanged += new System.EventHandler(this.TabGeneral_SelectedIndexChanged);
             // 
             // tabMenuPrincipal
-            // 
+            //
+            this.tabMenuPrincipal.Controls.Add(this.btnRecalcularIntegridad);
+            this.tabMenuPrincipal.Controls.Add(this.btnVerificarIntegridad);
+            this.tabMenuPrincipal.Controls.Add(this.lblEstadoIntegridad);
             this.tabMenuPrincipal.Controls.Add(this.cmbIdiomas);
             this.tabMenuPrincipal.Location = new System.Drawing.Point(4, 22);
             this.tabMenuPrincipal.Margin = new System.Windows.Forms.Padding(2);
@@ -146,6 +194,37 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.cmbIdiomas.Size = new System.Drawing.Size(139, 21);
             this.cmbIdiomas.TabIndex = 0;
             this.cmbIdiomas.SelectedIndexChanged += new System.EventHandler(this.cmbIdiomas_SelectedIndexChanged);
+            //
+            // lblEstadoIntegridad
+            //
+            this.lblEstadoIntegridad.AutoSize = true;
+            this.lblEstadoIntegridad.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblEstadoIntegridad.Location = new System.Drawing.Point(18, 10);
+            this.lblEstadoIntegridad.Name = "lblEstadoIntegridad";
+            this.lblEstadoIntegridad.Size = new System.Drawing.Size(125, 13);
+            this.lblEstadoIntegridad.TabIndex = 1;
+            this.lblEstadoIntegridad.Text = "Integridad: pendiente...";
+            this.lblEstadoIntegridad.Click += new System.EventHandler(this.lblEstadoIntegridad_Click);
+            //
+            // btnVerificarIntegridad
+            //
+            this.btnVerificarIntegridad.Location = new System.Drawing.Point(21, 35);
+            this.btnVerificarIntegridad.Name = "btnVerificarIntegridad";
+            this.btnVerificarIntegridad.Size = new System.Drawing.Size(120, 23);
+            this.btnVerificarIntegridad.TabIndex = 2;
+            this.btnVerificarIntegridad.Text = "Verificar integridad";
+            this.btnVerificarIntegridad.UseVisualStyleBackColor = true;
+            this.btnVerificarIntegridad.Click += new System.EventHandler(this.btnVerificarIntegridad_Click);
+            //
+            // btnRecalcularIntegridad
+            //
+            this.btnRecalcularIntegridad.Location = new System.Drawing.Point(147, 35);
+            this.btnRecalcularIntegridad.Name = "btnRecalcularIntegridad";
+            this.btnRecalcularIntegridad.Size = new System.Drawing.Size(148, 23);
+            this.btnRecalcularIntegridad.TabIndex = 3;
+            this.btnRecalcularIntegridad.Text = "Recalcular verificadores";
+            this.btnRecalcularIntegridad.UseVisualStyleBackColor = true;
+            this.btnRecalcularIntegridad.Click += new System.EventHandler(this.btnRecalcularIntegridad_Click);
             // 
             // tabUsuarios
             // 
@@ -534,8 +613,8 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.dgvCambios.TabIndex = 1;
             // 
             // tabPermisos
-            // 
-            this.tabPermisos.Controls.Add(this.button1);
+            //
+            this.tabPermisos.Controls.Add(this.grpPermisosAdmin);
             this.tabPermisos.Controls.Add(this.lblUsuarioSel);
             this.tabPermisos.Controls.Add(this.btnAsignar);
             this.tabPermisos.Controls.Add(this.btnQuitar);
@@ -547,61 +626,433 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.tabPermisos.TabIndex = 4;
             this.tabPermisos.Text = "Permisos";
             this.tabPermisos.UseVisualStyleBackColor = true;
-            // 
+            //
+            // grpPermisosAdmin
+            //
+            this.grpPermisosAdmin.Controls.Add(this.btnQuitarRelacionPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.btnAgregarRelacionPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.btnCrearPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.btnActualizarPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.chkNuevoPermisoCompuesto);
+            this.grpPermisosAdmin.Controls.Add(this.chkPermisoEsCompuesto);
+            this.grpPermisosAdmin.Controls.Add(this.cmbPermisoHijo);
+            this.grpPermisosAdmin.Controls.Add(this.cmbPermisoPadre);
+            this.grpPermisosAdmin.Controls.Add(this.txtNuevoPermisoNombre);
+            this.grpPermisosAdmin.Controls.Add(this.txtPermisoNombre);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoHijo);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoPadre);
+            this.grpPermisosAdmin.Controls.Add(this.lblNuevoPermiso);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoNombre);
+            this.grpPermisosAdmin.Controls.Add(this.lblPermisoExistente);
+            this.grpPermisosAdmin.Controls.Add(this.cmbPermisosExistentes);
+            this.grpPermisosAdmin.Location = new System.Drawing.Point(3, 210);
+            this.grpPermisosAdmin.Name = "grpPermisosAdmin";
+            this.grpPermisosAdmin.Size = new System.Drawing.Size(754, 170);
+            this.grpPermisosAdmin.TabIndex = 5;
+            this.grpPermisosAdmin.TabStop = false;
+            this.grpPermisosAdmin.Text = "Gestión de permisos";
+            //
+            // btnQuitarRelacionPermiso
+            //
+            this.btnQuitarRelacionPermiso.Location = new System.Drawing.Point(528, 130);
+            this.btnQuitarRelacionPermiso.Name = "btnQuitarRelacionPermiso";
+            this.btnQuitarRelacionPermiso.Size = new System.Drawing.Size(160, 23);
+            this.btnQuitarRelacionPermiso.TabIndex = 15;
+            this.btnQuitarRelacionPermiso.Text = "Quitar relación";
+            this.btnQuitarRelacionPermiso.UseVisualStyleBackColor = true;
+            this.btnQuitarRelacionPermiso.Click += new System.EventHandler(this.btnQuitarRelacionPermiso_Click);
+            //
+            // btnAgregarRelacionPermiso
+            //
+            this.btnAgregarRelacionPermiso.Location = new System.Drawing.Point(528, 100);
+            this.btnAgregarRelacionPermiso.Name = "btnAgregarRelacionPermiso";
+            this.btnAgregarRelacionPermiso.Size = new System.Drawing.Size(160, 23);
+            this.btnAgregarRelacionPermiso.TabIndex = 14;
+            this.btnAgregarRelacionPermiso.Text = "Agregar relación";
+            this.btnAgregarRelacionPermiso.UseVisualStyleBackColor = true;
+            this.btnAgregarRelacionPermiso.Click += new System.EventHandler(this.btnAgregarRelacionPermiso_Click);
+            //
+            // btnCrearPermiso
+            //
+            this.btnCrearPermiso.Location = new System.Drawing.Point(528, 66);
+            this.btnCrearPermiso.Name = "btnCrearPermiso";
+            this.btnCrearPermiso.Size = new System.Drawing.Size(160, 23);
+            this.btnCrearPermiso.TabIndex = 13;
+            this.btnCrearPermiso.Text = "Crear permiso";
+            this.btnCrearPermiso.UseVisualStyleBackColor = true;
+            this.btnCrearPermiso.Click += new System.EventHandler(this.btnCrearPermiso_Click);
+            //
+            // btnActualizarPermiso
+            //
+            this.btnActualizarPermiso.Location = new System.Drawing.Point(528, 32);
+            this.btnActualizarPermiso.Name = "btnActualizarPermiso";
+            this.btnActualizarPermiso.Size = new System.Drawing.Size(160, 23);
+            this.btnActualizarPermiso.TabIndex = 12;
+            this.btnActualizarPermiso.Text = "Guardar cambios";
+            this.btnActualizarPermiso.UseVisualStyleBackColor = true;
+            this.btnActualizarPermiso.Click += new System.EventHandler(this.btnActualizarPermiso_Click);
+            //
+            // chkNuevoPermisoCompuesto
+            //
+            this.chkNuevoPermisoCompuesto.AutoSize = true;
+            this.chkNuevoPermisoCompuesto.Location = new System.Drawing.Point(358, 70);
+            this.chkNuevoPermisoCompuesto.Name = "chkNuevoPermisoCompuesto";
+            this.chkNuevoPermisoCompuesto.Size = new System.Drawing.Size(141, 17);
+            this.chkNuevoPermisoCompuesto.TabIndex = 11;
+            this.chkNuevoPermisoCompuesto.Text = "Es permiso compuesto";
+            this.chkNuevoPermisoCompuesto.UseVisualStyleBackColor = true;
+            //
+            // chkPermisoEsCompuesto
+            //
+            this.chkPermisoEsCompuesto.AutoSize = true;
+            this.chkPermisoEsCompuesto.Location = new System.Drawing.Point(358, 36);
+            this.chkPermisoEsCompuesto.Name = "chkPermisoEsCompuesto";
+            this.chkPermisoEsCompuesto.Size = new System.Drawing.Size(141, 17);
+            this.chkPermisoEsCompuesto.TabIndex = 10;
+            this.chkPermisoEsCompuesto.Text = "Es permiso compuesto";
+            this.chkPermisoEsCompuesto.UseVisualStyleBackColor = true;
+            //
+            // cmbPermisoHijo
+            //
+            this.cmbPermisoHijo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPermisoHijo.FormattingEnabled = true;
+            this.cmbPermisoHijo.Location = new System.Drawing.Point(150, 130);
+            this.cmbPermisoHijo.Name = "cmbPermisoHijo";
+            this.cmbPermisoHijo.Size = new System.Drawing.Size(188, 21);
+            this.cmbPermisoHijo.TabIndex = 9;
+            //
+            // cmbPermisoPadre
+            //
+            this.cmbPermisoPadre.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPermisoPadre.FormattingEnabled = true;
+            this.cmbPermisoPadre.Location = new System.Drawing.Point(150, 100);
+            this.cmbPermisoPadre.Name = "cmbPermisoPadre";
+            this.cmbPermisoPadre.Size = new System.Drawing.Size(188, 21);
+            this.cmbPermisoPadre.TabIndex = 8;
+            //
+            // txtNuevoPermisoNombre
+            //
+            this.txtNuevoPermisoNombre.Location = new System.Drawing.Point(150, 68);
+            this.txtNuevoPermisoNombre.Name = "txtNuevoPermisoNombre";
+            this.txtNuevoPermisoNombre.Size = new System.Drawing.Size(188, 20);
+            this.txtNuevoPermisoNombre.TabIndex = 7;
+            //
+            // txtPermisoNombre
+            //
+            this.txtPermisoNombre.Location = new System.Drawing.Point(150, 34);
+            this.txtPermisoNombre.Name = "txtPermisoNombre";
+            this.txtPermisoNombre.Size = new System.Drawing.Size(188, 20);
+            this.txtPermisoNombre.TabIndex = 6;
+            //
+            // lblPermisoHijo
+            //
+            this.lblPermisoHijo.AutoSize = true;
+            this.lblPermisoHijo.Location = new System.Drawing.Point(10, 133);
+            this.lblPermisoHijo.Name = "lblPermisoHijo";
+            this.lblPermisoHijo.Size = new System.Drawing.Size(69, 13);
+            this.lblPermisoHijo.TabIndex = 5;
+            this.lblPermisoHijo.Text = "Permiso hijo";
+            //
+            // lblPermisoPadre
+            //
+            this.lblPermisoPadre.AutoSize = true;
+            this.lblPermisoPadre.Location = new System.Drawing.Point(10, 103);
+            this.lblPermisoPadre.Name = "lblPermisoPadre";
+            this.lblPermisoPadre.Size = new System.Drawing.Size(74, 13);
+            this.lblPermisoPadre.TabIndex = 4;
+            this.lblPermisoPadre.Text = "Permiso padre";
+            //
+            // lblNuevoPermiso
+            //
+            this.lblNuevoPermiso.AutoSize = true;
+            this.lblNuevoPermiso.Location = new System.Drawing.Point(10, 71);
+            this.lblNuevoPermiso.Name = "lblNuevoPermiso";
+            this.lblNuevoPermiso.Size = new System.Drawing.Size(82, 13);
+            this.lblNuevoPermiso.TabIndex = 3;
+            this.lblNuevoPermiso.Text = "Nuevo permiso";
+            //
+            // lblPermisoNombre
+            //
+            this.lblPermisoNombre.AutoSize = true;
+            this.lblPermisoNombre.Location = new System.Drawing.Point(10, 37);
+            this.lblPermisoNombre.Name = "lblPermisoNombre";
+            this.lblPermisoNombre.Size = new System.Drawing.Size(89, 13);
+            this.lblPermisoNombre.TabIndex = 2;
+            this.lblPermisoNombre.Text = "Nombre asignado";
+            //
+            // lblPermisoExistente
+            //
+            this.lblPermisoExistente.AutoSize = true;
+            this.lblPermisoExistente.Location = new System.Drawing.Point(10, 17);
+            this.lblPermisoExistente.Name = "lblPermisoExistente";
+            this.lblPermisoExistente.Size = new System.Drawing.Size(90, 13);
+            this.lblPermisoExistente.TabIndex = 1;
+            this.lblPermisoExistente.Text = "Permiso existente";
+            //
+            // cmbPermisosExistentes
+            //
+            this.cmbPermisosExistentes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPermisosExistentes.FormattingEnabled = true;
+            this.cmbPermisosExistentes.Location = new System.Drawing.Point(150, 14);
+            this.cmbPermisosExistentes.Name = "cmbPermisosExistentes";
+            this.cmbPermisosExistentes.Size = new System.Drawing.Size(188, 21);
+            this.cmbPermisosExistentes.TabIndex = 0;
+            this.cmbPermisosExistentes.SelectedIndexChanged += new System.EventHandler(this.cmbPermisosExistentes_SelectedIndexChanged);
+            //
             // lblUsuarioSel
-            // 
+            //
             this.lblUsuarioSel.AutoSize = true;
             this.lblUsuarioSel.Location = new System.Drawing.Point(222, 22);
             this.lblUsuarioSel.Name = "lblUsuarioSel";
             this.lblUsuarioSel.Size = new System.Drawing.Size(35, 13);
             this.lblUsuarioSel.TabIndex = 4;
             this.lblUsuarioSel.Text = "label1";
-            // 
+            //
             // btnAsignar
-            // 
-            this.btnAsignar.Location = new System.Drawing.Point(328, 148);
+            //
+            this.btnAsignar.Location = new System.Drawing.Point(328, 80);
             this.btnAsignar.Name = "btnAsignar";
-            this.btnAsignar.Size = new System.Drawing.Size(108, 23);
+            this.btnAsignar.Size = new System.Drawing.Size(120, 23);
             this.btnAsignar.TabIndex = 3;
             this.btnAsignar.Text = "Asignar Permiso";
             this.btnAsignar.UseVisualStyleBackColor = true;
             this.btnAsignar.Click += new System.EventHandler(this.btnAsignar_Click);
-            // 
+            //
             // btnQuitar
-            // 
-            this.btnQuitar.Location = new System.Drawing.Point(328, 202);
+            //
+            this.btnQuitar.Location = new System.Drawing.Point(328, 120);
             this.btnQuitar.Name = "btnQuitar";
-            this.btnQuitar.Size = new System.Drawing.Size(108, 23);
+            this.btnQuitar.Size = new System.Drawing.Size(120, 23);
             this.btnQuitar.TabIndex = 2;
             this.btnQuitar.Text = "Quitar Permiso";
             this.btnQuitar.UseVisualStyleBackColor = true;
             this.btnQuitar.Click += new System.EventHandler(this.btnQuitar_Click);
-            // 
+            //
             // treeDisponibles
-            // 
+            //
             this.treeDisponibles.Location = new System.Drawing.Point(534, 3);
             this.treeDisponibles.Name = "treeDisponibles";
-            this.treeDisponibles.Size = new System.Drawing.Size(213, 377);
+            this.treeDisponibles.Size = new System.Drawing.Size(223, 200);
             this.treeDisponibles.TabIndex = 1;
             this.treeDisponibles.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeDisponibles_AfterSelect);
-            // 
+            //
             // treeUsuarios
-            // 
+            //
             this.treeUsuarios.Location = new System.Drawing.Point(3, 3);
             this.treeUsuarios.Name = "treeUsuarios";
-            this.treeUsuarios.Size = new System.Drawing.Size(213, 377);
+            this.treeUsuarios.Size = new System.Drawing.Size(223, 200);
             this.treeUsuarios.TabIndex = 0;
             this.treeUsuarios.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeUsuarios_AfterSelect_1);
+            //
+            // tabIdiomas
+            //
+            this.tabIdiomas.Controls.Add(this.btnNuevaLeyenda);
+            this.tabIdiomas.Controls.Add(this.btnGuardarLeyenda);
+            this.tabIdiomas.Controls.Add(this.txtLeyendaTexto);
+            this.tabIdiomas.Controls.Add(this.lblLeyendaTexto);
+            this.tabIdiomas.Controls.Add(this.txtLeyendaDescripcion);
+            this.tabIdiomas.Controls.Add(this.lblLeyendaDescripcion);
+            this.tabIdiomas.Controls.Add(this.txtLeyendaClave);
+            this.tabIdiomas.Controls.Add(this.lblLeyendaClave);
+            this.tabIdiomas.Controls.Add(this.dgvLeyendas);
+            this.tabIdiomas.Controls.Add(this.btnNuevoIdioma);
+            this.tabIdiomas.Controls.Add(this.btnActualizarIdioma);
+            this.tabIdiomas.Controls.Add(this.btnCrearIdioma);
+            this.tabIdiomas.Controls.Add(this.chkIdiomaPorDefecto);
+            this.tabIdiomas.Controls.Add(this.lblIdiomaPorDefecto);
+            this.tabIdiomas.Controls.Add(this.txtIdiomaNombre);
+            this.tabIdiomas.Controls.Add(this.lblIdiomaNombre);
+            this.tabIdiomas.Controls.Add(this.txtIdiomaCodigo);
+            this.tabIdiomas.Controls.Add(this.lblIdiomaCodigo);
+            this.tabIdiomas.Controls.Add(this.dgvIdiomasAdmin);
+            this.tabIdiomas.Controls.Add(this.lblIdiomaSeleccionadoAdmin);
+            this.tabIdiomas.Location = new System.Drawing.Point(4, 22);
+            this.tabIdiomas.Name = "tabIdiomas";
+            this.tabIdiomas.Padding = new System.Windows.Forms.Padding(3);
+            this.tabIdiomas.Size = new System.Drawing.Size(760, 383);
+            this.tabIdiomas.TabIndex = 5;
+            this.tabIdiomas.Text = "Idiomas";
+            this.tabIdiomas.UseVisualStyleBackColor = true;
+            //
+            // btnNuevaLeyenda
+            //
+            this.btnNuevaLeyenda.Location = new System.Drawing.Point(635, 347);
+            this.btnNuevaLeyenda.Name = "btnNuevaLeyenda";
+            this.btnNuevaLeyenda.Size = new System.Drawing.Size(115, 23);
+            this.btnNuevaLeyenda.TabIndex = 19;
+            this.btnNuevaLeyenda.Text = "Nueva leyenda";
+            this.btnNuevaLeyenda.UseVisualStyleBackColor = true;
+            this.btnNuevaLeyenda.Click += new System.EventHandler(this.btnNuevaLeyenda_Click);
+            //
+            // btnGuardarLeyenda
+            //
+            this.btnGuardarLeyenda.Location = new System.Drawing.Point(635, 318);
+            this.btnGuardarLeyenda.Name = "btnGuardarLeyenda";
+            this.btnGuardarLeyenda.Size = new System.Drawing.Size(115, 23);
+            this.btnGuardarLeyenda.TabIndex = 18;
+            this.btnGuardarLeyenda.Text = "Guardar leyenda";
+            this.btnGuardarLeyenda.UseVisualStyleBackColor = true;
+            this.btnGuardarLeyenda.Click += new System.EventHandler(this.btnGuardarLeyenda_Click);
+            //
+            // txtLeyendaTexto
+            //
+            this.txtLeyendaTexto.Location = new System.Drawing.Point(315, 349);
+            this.txtLeyendaTexto.Name = "txtLeyendaTexto";
+            this.txtLeyendaTexto.Size = new System.Drawing.Size(314, 20);
+            this.txtLeyendaTexto.TabIndex = 17;
+            //
+            // lblLeyendaTexto
+            //
+            this.lblLeyendaTexto.AutoSize = true;
+            this.lblLeyendaTexto.Location = new System.Drawing.Point(251, 352);
+            this.lblLeyendaTexto.Name = "lblLeyendaTexto";
+            this.lblLeyendaTexto.Size = new System.Drawing.Size(34, 13);
+            this.lblLeyendaTexto.TabIndex = 16;
+            this.lblLeyendaTexto.Text = "Texto";
+            //
+            // txtLeyendaDescripcion
+            //
+            this.txtLeyendaDescripcion.Location = new System.Drawing.Point(510, 319);
+            this.txtLeyendaDescripcion.Name = "txtLeyendaDescripcion";
+            this.txtLeyendaDescripcion.Size = new System.Drawing.Size(119, 20);
+            this.txtLeyendaDescripcion.TabIndex = 15;
+            //
+            // lblLeyendaDescripcion
+            //
+            this.lblLeyendaDescripcion.AutoSize = true;
+            this.lblLeyendaDescripcion.Location = new System.Drawing.Point(407, 322);
+            this.lblLeyendaDescripcion.Name = "lblLeyendaDescripcion";
+            this.lblLeyendaDescripcion.Size = new System.Drawing.Size(63, 13);
+            this.lblLeyendaDescripcion.TabIndex = 14;
+            this.lblLeyendaDescripcion.Text = "Descripción";
+            //
+            // txtLeyendaClave
+            //
+            this.txtLeyendaClave.Location = new System.Drawing.Point(315, 319);
+            this.txtLeyendaClave.Name = "txtLeyendaClave";
+            this.txtLeyendaClave.Size = new System.Drawing.Size(86, 20);
+            this.txtLeyendaClave.TabIndex = 13;
+            //
+            // lblLeyendaClave
+            //
+            this.lblLeyendaClave.AutoSize = true;
+            this.lblLeyendaClave.Location = new System.Drawing.Point(251, 322);
+            this.lblLeyendaClave.Name = "lblLeyendaClave";
+            this.lblLeyendaClave.Size = new System.Drawing.Size(34, 13);
+            this.lblLeyendaClave.TabIndex = 12;
+            this.lblLeyendaClave.Text = "Clave";
+            //
+            // dgvLeyendas
+            //
+            this.dgvLeyendas.AllowUserToAddRows = false;
+            this.dgvLeyendas.AllowUserToDeleteRows = false;
+            this.dgvLeyendas.Location = new System.Drawing.Point(254, 170);
+            this.dgvLeyendas.Name = "dgvLeyendas";
+            this.dgvLeyendas.ReadOnly = true;
+            this.dgvLeyendas.Size = new System.Drawing.Size(496, 140);
+            this.dgvLeyendas.TabIndex = 11;
+            this.dgvLeyendas.SelectionChanged += new System.EventHandler(this.dgvLeyendas_SelectionChanged);
+            //
+            // btnNuevoIdioma
+            //
+            this.btnNuevoIdioma.Location = new System.Drawing.Point(566, 130);
+            this.btnNuevoIdioma.Name = "btnNuevoIdioma";
+            this.btnNuevoIdioma.Size = new System.Drawing.Size(120, 23);
+            this.btnNuevoIdioma.TabIndex = 10;
+            this.btnNuevoIdioma.Text = "Nuevo idioma";
+            this.btnNuevoIdioma.UseVisualStyleBackColor = true;
+            this.btnNuevoIdioma.Click += new System.EventHandler(this.btnNuevoIdioma_Click);
+            //
+            // btnActualizarIdioma
+            //
+            this.btnActualizarIdioma.Location = new System.Drawing.Point(440, 130);
+            this.btnActualizarIdioma.Name = "btnActualizarIdioma";
+            this.btnActualizarIdioma.Size = new System.Drawing.Size(120, 23);
+            this.btnActualizarIdioma.TabIndex = 9;
+            this.btnActualizarIdioma.Text = "Actualizar idioma";
+            this.btnActualizarIdioma.UseVisualStyleBackColor = true;
+            this.btnActualizarIdioma.Click += new System.EventHandler(this.btnActualizarIdioma_Click);
+            //
+            // btnCrearIdioma
+            //
+            this.btnCrearIdioma.Location = new System.Drawing.Point(314, 130);
+            this.btnCrearIdioma.Name = "btnCrearIdioma";
+            this.btnCrearIdioma.Size = new System.Drawing.Size(120, 23);
+            this.btnCrearIdioma.TabIndex = 8;
+            this.btnCrearIdioma.Text = "Crear idioma";
+            this.btnCrearIdioma.UseVisualStyleBackColor = true;
+            this.btnCrearIdioma.Click += new System.EventHandler(this.btnCrearIdioma_Click);
+            //
+            // chkIdiomaPorDefecto
+            //
+            this.chkIdiomaPorDefecto.AutoSize = true;
+            this.chkIdiomaPorDefecto.Location = new System.Drawing.Point(440, 104);
+            this.chkIdiomaPorDefecto.Name = "chkIdiomaPorDefecto";
+            this.chkIdiomaPorDefecto.Size = new System.Drawing.Size(15, 14);
+            this.chkIdiomaPorDefecto.TabIndex = 7;
+            this.chkIdiomaPorDefecto.UseVisualStyleBackColor = true;
+            //
+            // lblIdiomaPorDefecto
+            //
+            this.lblIdiomaPorDefecto.AutoSize = true;
+            this.lblIdiomaPorDefecto.Location = new System.Drawing.Point(251, 104);
+            this.lblIdiomaPorDefecto.Name = "lblIdiomaPorDefecto";
+            this.lblIdiomaPorDefecto.Size = new System.Drawing.Size(103, 13);
+            this.lblIdiomaPorDefecto.TabIndex = 6;
+            this.lblIdiomaPorDefecto.Text = "Idioma por defecto";
+            //
+            // txtIdiomaNombre
+            //
+            this.txtIdiomaNombre.Location = new System.Drawing.Point(315, 72);
+            this.txtIdiomaNombre.Name = "txtIdiomaNombre";
+            this.txtIdiomaNombre.Size = new System.Drawing.Size(247, 20);
+            this.txtIdiomaNombre.TabIndex = 5;
+            //
+            // lblIdiomaNombre
+            //
+            this.lblIdiomaNombre.AutoSize = true;
+            this.lblIdiomaNombre.Location = new System.Drawing.Point(251, 75);
+            this.lblIdiomaNombre.Name = "lblIdiomaNombre";
+            this.lblIdiomaNombre.Size = new System.Drawing.Size(44, 13);
+            this.lblIdiomaNombre.TabIndex = 4;
+            this.lblIdiomaNombre.Text = "Nombre";
+            //
+            // txtIdiomaCodigo
+            //
+            this.txtIdiomaCodigo.Location = new System.Drawing.Point(315, 44);
+            this.txtIdiomaCodigo.Name = "txtIdiomaCodigo";
+            this.txtIdiomaCodigo.Size = new System.Drawing.Size(120, 20);
+            this.txtIdiomaCodigo.TabIndex = 3;
+            //
+            // lblIdiomaCodigo
+            //
+            this.lblIdiomaCodigo.AutoSize = true;
+            this.lblIdiomaCodigo.Location = new System.Drawing.Point(251, 47);
+            this.lblIdiomaCodigo.Name = "lblIdiomaCodigo";
+            this.lblIdiomaCodigo.Size = new System.Drawing.Size(40, 13);
+            this.lblIdiomaCodigo.TabIndex = 2;
+            this.lblIdiomaCodigo.Text = "Código";
+            //
+            // dgvIdiomasAdmin
+            //
+            this.dgvIdiomasAdmin.AllowUserToAddRows = false;
+            this.dgvIdiomasAdmin.AllowUserToDeleteRows = false;
+            this.dgvIdiomasAdmin.Location = new System.Drawing.Point(6, 28);
+            this.dgvIdiomasAdmin.Name = "dgvIdiomasAdmin";
+            this.dgvIdiomasAdmin.ReadOnly = true;
+            this.dgvIdiomasAdmin.Size = new System.Drawing.Size(230, 335);
+            this.dgvIdiomasAdmin.TabIndex = 1;
+            this.dgvIdiomasAdmin.SelectionChanged += new System.EventHandler(this.dgvIdiomasAdmin_SelectionChanged);
+            //
+            // lblIdiomaSeleccionadoAdmin
+            //
+            this.lblIdiomaSeleccionadoAdmin.AutoSize = true;
+            this.lblIdiomaSeleccionadoAdmin.Location = new System.Drawing.Point(3, 10);
+            this.lblIdiomaSeleccionadoAdmin.Name = "lblIdiomaSeleccionadoAdmin";
+            this.lblIdiomaSeleccionadoAdmin.Size = new System.Drawing.Size(108, 13);
+            this.lblIdiomaSeleccionadoAdmin.TabIndex = 0;
+            this.lblIdiomaSeleccionadoAdmin.Text = "Idioma seleccionado";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(328, 276);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(108, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "Quitar Permiso";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // FormPrueba
             // 
@@ -617,6 +1068,7 @@ namespace Proyecto_IS_Sistema_De_Tickets
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
             this.tabGeneral.ResumeLayout(false);
             this.tabMenuPrincipal.ResumeLayout(false);
+            this.tabMenuPrincipal.PerformLayout();
             this.tabUsuarios.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvGestionUsuario)).EndInit();
             this.tabBitacora.ResumeLayout(false);
@@ -626,7 +1078,12 @@ namespace Proyecto_IS_Sistema_De_Tickets
             this.tabControlCambios.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCambios)).EndInit();
             this.tabPermisos.ResumeLayout(false);
-            this.tabPermisos.PerformLayout();
+            this.grpPermisosAdmin.ResumeLayout(false);
+            this.grpPermisosAdmin.PerformLayout();
+            this.tabIdiomas.ResumeLayout(false);
+            this.tabIdiomas.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvLeyendas)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvIdiomasAdmin)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -688,7 +1145,47 @@ namespace Proyecto_IS_Sistema_De_Tickets
         private System.Windows.Forms.Button btnAsignar;
         private System.Windows.Forms.Button btnQuitar;
         private System.Windows.Forms.TreeView treeDisponibles;
+        private System.Windows.Forms.GroupBox grpPermisosAdmin;
+        private System.Windows.Forms.Button btnQuitarRelacionPermiso;
+        private System.Windows.Forms.Button btnAgregarRelacionPermiso;
+        private System.Windows.Forms.Button btnCrearPermiso;
+        private System.Windows.Forms.Button btnActualizarPermiso;
+        private System.Windows.Forms.CheckBox chkNuevoPermisoCompuesto;
+        private System.Windows.Forms.CheckBox chkPermisoEsCompuesto;
+        private System.Windows.Forms.ComboBox cmbPermisoHijo;
+        private System.Windows.Forms.ComboBox cmbPermisoPadre;
+        private System.Windows.Forms.TextBox txtNuevoPermisoNombre;
+        private System.Windows.Forms.TextBox txtPermisoNombre;
+        private System.Windows.Forms.Label lblPermisoHijo;
+        private System.Windows.Forms.Label lblPermisoPadre;
+        private System.Windows.Forms.Label lblNuevoPermiso;
+        private System.Windows.Forms.Label lblPermisoNombre;
+        private System.Windows.Forms.Label lblPermisoExistente;
+        private System.Windows.Forms.ComboBox cmbPermisosExistentes;
+        private System.Windows.Forms.TabPage tabIdiomas;
+        private System.Windows.Forms.Button btnNuevaLeyenda;
+        private System.Windows.Forms.Button btnGuardarLeyenda;
+        private System.Windows.Forms.TextBox txtLeyendaTexto;
+        private System.Windows.Forms.Label lblLeyendaTexto;
+        private System.Windows.Forms.TextBox txtLeyendaDescripcion;
+        private System.Windows.Forms.Label lblLeyendaDescripcion;
+        private System.Windows.Forms.TextBox txtLeyendaClave;
+        private System.Windows.Forms.Label lblLeyendaClave;
+        private System.Windows.Forms.DataGridView dgvLeyendas;
+        private System.Windows.Forms.Button btnNuevoIdioma;
+        private System.Windows.Forms.Button btnActualizarIdioma;
+        private System.Windows.Forms.Button btnCrearIdioma;
+        private System.Windows.Forms.CheckBox chkIdiomaPorDefecto;
+        private System.Windows.Forms.Label lblIdiomaPorDefecto;
+        private System.Windows.Forms.TextBox txtIdiomaNombre;
+        private System.Windows.Forms.Label lblIdiomaNombre;
+        private System.Windows.Forms.TextBox txtIdiomaCodigo;
+        private System.Windows.Forms.Label lblIdiomaCodigo;
+        private System.Windows.Forms.DataGridView dgvIdiomasAdmin;
+        private System.Windows.Forms.Label lblIdiomaSeleccionadoAdmin;
         private Button btnEliminar;
-        private Button button1;
+        private System.Windows.Forms.Label lblEstadoIntegridad;
+        private System.Windows.Forms.Button btnVerificarIntegridad;
+        private System.Windows.Forms.Button btnRecalcularIntegridad;
     }
 }

@@ -44,6 +44,7 @@
     <Compile Include="AuditoriaEvento.cs" />
     <Compile Include="ControlCambioEntry.cs" />
     <Compile Include="Idioma.cs" />
+    <Compile Include="LeyendaTraduccion.cs" />
     <Compile Include="Permiso.cs" />
     <Compile Include="PermisoComponent.cs" />
     <Compile Include="PermisoComposite.cs" />

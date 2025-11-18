@@ -18,7 +18,8 @@ namespace BE
         CambioPassword,
         AltaUsuario,
         BajaUsuario,
-        ModificacionUsuario
+        ModificacionUsuario,
+        IntegridadInconsistente
     }
     /// <summary>Entrada simple de auditoría del sistema.</summary>
     public class AuditoriaEntry

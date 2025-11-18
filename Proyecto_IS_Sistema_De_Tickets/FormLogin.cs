@@ -70,6 +70,15 @@ namespace Proyecto_IS_Sistema_De_Tickets
                 var (ok, detalle) = BL.VerificadorIntegridadService.Instancia.ValidarTodo();
                 if (!ok)
                 {
+                    try
+                    {
+                        new DAO.AuditoriaRepository().Registrar("INTEGRIDAD_FALLA", null, detalle);
+                    }
+                    catch
+                    {
+                        // si no se puede registrar, no detiene el flujo: el admin seguirá viendo el mensaje
+                    }
+
                     var r = MessageBox.Show(
                         "Se detectó una inconsistencia de integridad (DVH/DVV).\n\n" +
                         detalle + "\n\n" +

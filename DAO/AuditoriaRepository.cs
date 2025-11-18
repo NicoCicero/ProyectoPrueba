@@ -121,6 +121,7 @@ namespace DAO
                 case "ALTA_USUARIO": return AuditoriaEvento.AltaUsuario;
                 case "BAJA_USUARIO": return AuditoriaEvento.BajaUsuario;
                 case "MODIFICACION_USUARIO": return AuditoriaEvento.ModificacionUsuario;
+                case "INTEGRIDAD_FALLA": return AuditoriaEvento.IntegridadInconsistente;
                 default: return AuditoriaEvento.LoginFail;
             }
         }
