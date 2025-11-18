@@ -17,9 +17,19 @@ namespace Proyecto_IS_Sistema_De_Tickets
     public partial class FormPrueba : Form, IIdiomaObserver
     {
         private readonly IdiomaService _idiomaSrv = new IdiomaService();
+        private readonly List<BE.Idioma> _idiomasAdmin = new List<BE.Idioma>();
+        private List<BE.LeyendaTraduccion> _leyendasActuales = new List<BE.LeyendaTraduccion>();
+        private List<BE.PermisoComposite> _permisosPlanos = new List<BE.PermisoComposite>();
 
         private bool _registroVisible = false;   // estado del bloque de registro
-        private bool _regRolesCargados = false;  // ya lo tenés: lo dejamos 
+        private bool _regRolesCargados = false;  // ya lo tenés: lo dejamos
+
+        private bool _puedeGestionarUsuarios;
+        private bool _puedeVerBitacora;
+        private bool _puedeVerCambios;
+        private bool _puedeGestionarPermisos;
+        private bool _puedeGestionarIdiomas;
+        private bool? _ultimoEstadoIntegridadOk;
 
         private TabPage _tabRegistrar;
         private TabPage _tabBitacora;
@@ -42,78 +52,64 @@ namespace Proyecto_IS_Sistema_De_Tickets
             }
 
             var usuario = SessionManager.Instancia.UsuarioActual;
-            bool puedeGestionarUsuarios = SessionManager.Instancia.TienePermiso("Usuario.Modificar");
-            bool puedeVerBitacora = SessionManager.Instancia.TienePermiso("Bitacora.Ver");
-            bool puedeVerCambios = SessionManager.Instancia.TienePermiso("ControlCambios.Ver");
+            _puedeGestionarUsuarios = SessionManager.Instancia.TienePermiso("Usuario.Modificar");
+            _puedeVerBitacora = SessionManager.Instancia.TienePermiso("Bitacora.Ver");
+            _puedeVerCambios = SessionManager.Instancia.TienePermiso("ControlCambios.Ver");
+            _puedeGestionarPermisos = SessionManager.Instancia.TienePermiso("Permiso.Gestionar");
+            _puedeGestionarIdiomas = SessionManager.Instancia.TienePermiso("Idioma.Gestionar");
             bool puedeCrearTicket = usuario.TienePermiso("Ticket.Crear");
-            bool puedeGestionarPermisos = SessionManager.Instancia.TienePermiso("Permiso.Gestionar");
-
-            // guardo referencia al tab (asumo que es el cuarto o quinto)
-            TabPage _tabPermisos = tabGeneral.TabPages.Count > 4 ? tabGeneral.TabPages[4] : null;
-
-            // si no puede gestionarlos, lo quitamos
-            if (!puedeGestionarPermisos && _tabPermisos != null)
-            {
-                tabGeneral.TabPages.Remove(_tabPermisos);
-            }
-
-            if (puedeGestionarPermisos)
-            {
-                CargarUsuariosConPermisos();
-                CargarRolesYPermisosDisponibles();
-            }
-
 
             this.Text = $"FormPrueba - {usuario.Email} (Ticket.Crear={(puedeCrearTicket ? "Sí" : "No")})";
 
-            // guardo tabs
-            _tabRegistrar = tabGeneral.TabPages.Count > 1 ? tabGeneral.TabPages[1] : null;
-            _tabBitacora = tabGeneral.TabPages.Count > 2 ? tabGeneral.TabPages[2] : null;
-            _tabCambios = tabGeneral.TabPages.Count > 3 ? tabGeneral.TabPages[3] : null;
+            _tabRegistrar = tabUsuarios;
+            _tabBitacora = tabBitacora;
+            _tabCambios = tabControlCambios;
 
-            if (puedeGestionarUsuarios)
+            if (!_puedeGestionarPermisos && tabGeneral.TabPages.Contains(tabPermisos))
+                tabGeneral.TabPages.Remove(tabPermisos);
+            else if (_puedeGestionarPermisos)
+                InicializarGestionPermisos();
+
+            if (!_puedeGestionarIdiomas && tabGeneral.TabPages.Contains(tabIdiomas))
+                tabGeneral.TabPages.Remove(tabIdiomas);
+            else if (_puedeGestionarIdiomas)
+                CargarIdiomasAdmin();
+
+            if (_puedeGestionarUsuarios)
             {
                 SetRegistrarVisible(true);
                 CargarGrillaGestionUsuarios();
-
-                if (puedeVerBitacora)
-                {
-                    CargarEventosBitacoraHardcoded();
-                    CargarBitacoraInicial();
-                }
-
-                if (puedeVerCambios)
-                {
-                    CargarCambiosInicial();
-                }
             }
             else
             {
-                if (_tabRegistrar != null) tabGeneral.TabPages.Remove(_tabRegistrar);
-                if (!puedeVerBitacora && _tabBitacora != null) tabGeneral.TabPages.Remove(_tabBitacora);
-                if (!puedeVerCambios && _tabCambios != null) tabGeneral.TabPages.Remove(_tabCambios);
+                if (_tabRegistrar != null && tabGeneral.TabPages.Contains(_tabRegistrar))
+                    tabGeneral.TabPages.Remove(_tabRegistrar);
                 SetRegistrarVisible(false);
             }
 
-            var idiomas = _idiomaSrv.ListarIdiomas();
-            cmbIdiomas.DataSource = idiomas;
-            cmbIdiomas.DisplayMember = "Nombre";
-            cmbIdiomas.ValueMember = "Codigo";
+            if (!_puedeVerBitacora && _tabBitacora != null && tabGeneral.TabPages.Contains(_tabBitacora))
+                tabGeneral.TabPages.Remove(_tabBitacora);
+            else if (_puedeVerBitacora)
+            {
+                CargarEventosBitacoraHardcoded();
+                CargarBitacoraInicial();
+            }
 
-            var codActual = IdiomaManager.Instancia.CodigoActual;
-            if (!string.IsNullOrWhiteSpace(codActual) && idiomas.Any(i => i.Codigo == codActual))
-                cmbIdiomas.SelectedValue = codActual;
-            else
-                cmbIdiomas.SelectedValue = idiomas.FirstOrDefault(i => i.EsPorDefecto)?.Codigo ?? idiomas.First().Codigo;
+            if (!_puedeVerCambios && _tabCambios != null && tabGeneral.TabPages.Contains(_tabCambios))
+                tabGeneral.TabPages.Remove(_tabCambios);
+            else if (_puedeVerCambios)
+            {
+                CargarCambiosInicial();
+            }
 
-            // disparo el idioma por defecto para que todos los forms se pinten
-
-            treeUsuarios.AfterSelect += treeUsuarios_AfterSelect_1;
+            CargarSelectorIdiomas();
 
             dgvGestionUsuario.AllowUserToAddRows = false;
             dgvGestionUsuario.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvGestionUsuario.MultiSelect = false;
             dgvGestionUsuario.ReadOnly = true;  // si no editás inline
+
+            ActualizarEstadoIntegridadVisual();
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
@@ -125,35 +121,81 @@ namespace Proyecto_IS_Sistema_De_Tickets
         // este es el MÉTODO que llama el observer
         public void ActualizarIdioma(Dictionary<string, string> t)
         {
-            // pestañas
-            tabGeneral.TabPages[0].Text = t["TAB_MENU"];
-            tabGeneral.TabPages[1].Text = t["TAB_USUARIOS"];
-            tabGeneral.TabPages[2].Text = t["TAB_BITACORA"];
-            tabGeneral.TabPages[3].Text = t["TAB_CONTROL_CAMBIOS"];
+            if (tabGeneral.TabPages.Contains(tabMenuPrincipal))
+                tabMenuPrincipal.Text = Texto(t, "TAB_MENU");
+            if (tabGeneral.TabPages.Contains(tabUsuarios))
+                tabUsuarios.Text = Texto(t, "TAB_USUARIOS");
+            if (tabGeneral.TabPages.Contains(tabBitacora))
+                tabBitacora.Text = Texto(t, "TAB_BITACORA");
+            if (tabGeneral.TabPages.Contains(tabControlCambios))
+                tabControlCambios.Text = Texto(t, "TAB_CONTROL_CAMBIOS");
+            if (tabGeneral.TabPages.Contains(tabPermisos))
+                tabPermisos.Text = Texto(t, "TAB_PERMISOS");
+            if (tabGeneral.TabPages.Contains(tabIdiomas))
+                tabIdiomas.Text = Texto(t, "TAB_IDIOMAS");
 
-            // botones
-            btnCerrarSesion.Text = t["BTN_CERRAR_SESION"];
-            btnActualizar.Text = t["BTN_ACTUALIZAR"];
-            btnNuevoRegistro.Text = t["BTN_NUEVO_REGISTRO"];
+            btnCerrarSesion.Text = Texto(t, "BTN_CERRAR_SESION");
+            btnActualizar.Text = Texto(t, "BTN_ACTUALIZAR");
+            btnNuevoRegistro.Text = Texto(t, "BTN_NUEVO_REGISTRO");
+            btnEliminar.Text = Texto(t, "BTN_ELIMINAR_USUARIO");
 
-            // bitácora
-            lblUsuarioId.Text = t["LBL_USUARIO_ID"];
-            lblAuditoriaId.Text = t["LBL_AUDITORIA_ID"];
-            lblEvento.Text = t["LBL_EVENTO"];
-            lblDetalle.Text = t["LBL_DETALLE"];
-            lblFecha.Text = t["LBL_FECHA"];
-            btnFiltrarBitacora.Text = t["BTN_FILTRAR"];
-            btnLimpiar.Text = t["BTN_LIMPIAR"];
+            lblUsuarioId.Text = Texto(t, "LBL_USUARIO_ID");
+            lblAuditoriaId.Text = Texto(t, "LBL_AUDITORIA_ID");
+            lblEvento.Text = Texto(t, "LBL_EVENTO");
+            lblDetalle.Text = Texto(t, "LBL_DETALLE");
+            lblFecha.Text = Texto(t, "LBL_FECHA");
+            btnFiltrarBitacora.Text = Texto(t, "BTN_FILTRAR");
+            btnLimpiar.Text = Texto(t, "BTN_LIMPIAR");
 
-            // control cambios
-            lblCambioId.Text = t["LBL_CAMBIO_ID"];
-            lblCambioUsuarioId.Text = t["LBL_CAMBIO_USUARIO_ID"];
-            lblCambioEntidad.Text = t["LBL_CAMBIO_ENTIDAD"];
-            lblCambioEntidadId.Text = t["LBL_CAMBIO_ENTIDAD_ID"];
-            lblCambioCampo.Text = t["LBL_CAMBIO_CAMPO"];
-            //lblCambioFecha.Text = t["LBL_CAMBIO_FECHA"];
-            btnFiltrarCambios.Text = t["BTN_FILTRAR"];
-            btnLimpiarCambios.Text = t["BTN_LIMPIAR"];
+            lblCambioId.Text = Texto(t, "LBL_CAMBIO_ID");
+            lblCambioUsuarioId.Text = Texto(t, "LBL_CAMBIO_USUARIO_ID");
+            lblCambioEntidad.Text = Texto(t, "LBL_CAMBIO_ENTIDAD");
+            lblCambioEntidadId.Text = Texto(t, "LBL_CAMBIO_ENTIDAD_ID");
+            lblCambioCampo.Text = Texto(t, "LBL_CAMBIO_CAMPO");
+            btnFiltrarCambios.Text = Texto(t, "BTN_FILTRAR");
+            btnLimpiarCambios.Text = Texto(t, "BTN_LIMPIAR");
+
+            if (tabGeneral.TabPages.Contains(tabPermisos))
+            {
+                btnAsignar.Text = Texto(t, "BTN_PERMISO_ASIGNAR");
+                btnQuitar.Text = Texto(t, "BTN_PERMISO_QUITAR");
+                lblUsuarioSel.Text = Texto(t, "LBL_USUARIO_SELECCIONADO");
+                lblPermisoExistente.Text = Texto(t, "LBL_PERMISO_EXISTENTE");
+                lblPermisoNombre.Text = Texto(t, "LBL_PERMISO_NOMBRE");
+                lblNuevoPermiso.Text = Texto(t, "LBL_PERMISO_NUEVO");
+                lblPermisoPadre.Text = Texto(t, "LBL_PERMISO_PADRE");
+                lblPermisoHijo.Text = Texto(t, "LBL_PERMISO_HIJO");
+                btnActualizarPermiso.Text = Texto(t, "BTN_PERMISO_GUARDAR");
+                btnCrearPermiso.Text = Texto(t, "BTN_PERMISO_CREAR");
+                btnAgregarRelacionPermiso.Text = Texto(t, "BTN_PERMISO_RELACION_AGREGAR");
+                btnQuitarRelacionPermiso.Text = Texto(t, "BTN_PERMISO_RELACION_QUITAR");
+            }
+
+            if (tabGeneral.TabPages.Contains(tabIdiomas))
+            {
+                lblIdiomaCodigo.Text = Texto(t, "LBL_IDIOMA_CODIGO");
+                lblIdiomaNombre.Text = Texto(t, "LBL_IDIOMA_NOMBRE");
+                lblIdiomaPorDefecto.Text = Texto(t, "LBL_IDIOMA_POR_DEFECTO");
+                btnCrearIdioma.Text = Texto(t, "BTN_IDIOMA_CREAR");
+                btnActualizarIdioma.Text = Texto(t, "BTN_IDIOMA_ACTUALIZAR");
+                btnNuevoIdioma.Text = Texto(t, "BTN_IDIOMA_NUEVO");
+                lblLeyendaClave.Text = Texto(t, "LBL_LEYENDA_CLAVE");
+                lblLeyendaDescripcion.Text = Texto(t, "LBL_LEYENDA_DESCRIPCION");
+                lblLeyendaTexto.Text = Texto(t, "LBL_LEYENDA_TEXTO");
+                btnGuardarLeyenda.Text = Texto(t, "BTN_LEYENDA_GUARDAR");
+                btnNuevaLeyenda.Text = Texto(t, "BTN_LEYENDA_NUEVA");
+                lblIdiomaSeleccionadoAdmin.Text = Texto(t, "LBL_IDIOMA_SELECCIONADO");
+            }
+
+            btnVerificarIntegridad.Text = Texto(t, "BTN_VERIFICAR_INTEGRIDAD");
+            btnRecalcularIntegridad.Text = Texto(t, "BTN_RECALCULAR_INTEGRIDAD");
+        }
+
+        private string Texto(Dictionary<string, string> dic, string clave)
+        {
+            if (dic != null && dic.TryGetValue(clave, out var valor))
+                return valor;
+            return $"[{clave}]";
         }
 
         private void btnCerrarSesion_Click(object sender, EventArgs e)
@@ -167,68 +209,62 @@ namespace Proyecto_IS_Sistema_De_Tickets
 
         private void TabGeneral_SelectedIndexChanged(object sender, EventArgs e)
         {
-            bool puedeGestionarUsuarios = SessionManager.Instancia.TienePermiso("Usuario.Modificar");
-            bool puedeVerBitacora = SessionManager.Instancia.TienePermiso("Bitacora.Ver");
-            bool puedeVerCambios = SessionManager.Instancia.TienePermiso("ControlCambios.Ver");
+            var pagina = tabGeneral.SelectedTab;
+            if (pagina == null)
+                return;
 
-            switch (tabGeneral.SelectedIndex)
+            if (pagina == tabUsuarios)
             {
-                case 0: // 🏠 Menú principal
-                        // No hay restricción, todos pueden verlo
-                    break;
+                if (!_puedeGestionarUsuarios)
+                {
+                    MessageBox.Show("No contás con permiso para gestionar usuarios.");
+                    tabGeneral.SelectedTab = tabMenuPrincipal;
+                    return;
+                }
 
-                case 1: // 👤 Registrar usuarios
-                    if (!puedeGestionarUsuarios)
-                    {
-                        MessageBox.Show("No contás con permiso para gestionar usuarios.");
-                        tabGeneral.SelectedIndex = 0; // vuelve al menú
-                        return;
-                    }
+                SetRegistrarVisible(true);
+                CargarGrillaGestionUsuarios();
+            }
+            else if (pagina == tabBitacora)
+            {
+                if (!_puedeVerBitacora)
+                {
+                    MessageBox.Show("No contás con permiso para ver la Bitácora.");
+                    tabGeneral.SelectedTab = tabMenuPrincipal;
+                    return;
+                }
 
-                    // Si es admin, mostramos y refrescamos la grilla
-                    SetRegistrarVisible(true);
-                    CargarGrillaGestionUsuarios();
-                    break;
-
-                case 2: // 📜 Bitácora
-                    if (!puedeVerBitacora)
-                    {
-                        MessageBox.Show("No contás con permiso para ver la Bitácora.");
-                        tabGeneral.SelectedIndex = 0;
-                        return;
-                    }
-
-                    // Carga inicial (si no se cargó antes)
+                if (!_regRolesCargados)
                     CargarEventosBitacoraHardcoded();
-                    CargarBitacoraInicial();
-                    break;
-                case 3: // 👈 cambios
-                    if (!puedeVerCambios)
-                    {
-                        MessageBox.Show("No contás con permiso para ver el Control de Cambios.");
-                        tabGeneral.SelectedIndex = 0;
-                        return;
-                    }
-                    CargarCambiosInicial();
-                    break;
+            }
+            else if (pagina == tabControlCambios)
+            {
+                if (!_puedeVerCambios)
+                {
+                    MessageBox.Show("No contás con permiso para ver el Control de Cambios.");
+                    tabGeneral.SelectedTab = tabMenuPrincipal;
+                    return;
+                }
+            }
+            else if (pagina == tabPermisos)
+            {
+                if (!_puedeGestionarPermisos)
+                {
+                    MessageBox.Show("No contás con permiso para administrar permisos.");
+                    tabGeneral.SelectedTab = tabMenuPrincipal;
+                    return;
+                }
+            }
+            else if (pagina == tabIdiomas)
+            {
+                if (!_puedeGestionarIdiomas)
+                {
+                    MessageBox.Show("No contás con permiso para administrar idiomas.");
+                    tabGeneral.SelectedTab = tabMenuPrincipal;
+                    return;
+                }
 
-                case 4: // o 5, según corresponda
-                    bool puedeGestionarPermisos = SessionManager.Instancia.TienePermiso("Permiso.Gestionar");
-                    if (!puedeGestionarPermisos)
-                    {
-                        MessageBox.Show("No contás con permiso para gestionar permisos.");
-                        tabGeneral.SelectedIndex = 0;
-                        return;
-                    }
-
-                    // si tiene permiso, cargamos el contenido
-                    CargarUsuariosConPermisos();
-                    CargarRolesYPermisosDisponibles();
-                    break;
-                default:
-                    // En caso de que se agreguen nuevas pestañas y quieras controlar más
-                    tabGeneral.SelectedIndex = 0;
-                    break;
+                CargarIdiomasAdmin();
             }
         }
         private void CargarCambiosInicial()
@@ -629,9 +665,138 @@ namespace Proyecto_IS_Sistema_De_Tickets
             }
         }
 
+        private void CargarSelectorIdiomas()
+        {
+            var idiomas = _idiomaSrv.ListarIdiomas();
+            cmbIdiomas.DataSource = idiomas;
+            cmbIdiomas.DisplayMember = "Nombre";
+            cmbIdiomas.ValueMember = "Codigo";
+
+            if (idiomas.Count == 0)
+                return;
+
+            var codActual = IdiomaManager.Instancia.CodigoActual;
+            if (!string.IsNullOrWhiteSpace(codActual) && idiomas.Any(i => i.Codigo == codActual))
+                cmbIdiomas.SelectedValue = codActual;
+            else
+                cmbIdiomas.SelectedValue = idiomas.FirstOrDefault(i => i.EsPorDefecto)?.Codigo ?? idiomas.First().Codigo;
+        }
+
         private void FormPrueba_FormClosed(object sender, FormClosedEventArgs e)
         {
             IdiomaManager.Instancia.Desuscribir(this);
+        }
+
+        private void ActualizarEstadoIntegridadVisual()
+        {
+            if (lblEstadoIntegridad == null)
+                return;
+
+            try
+            {
+                var (ok, detalle) = BL.VerificadorIntegridadService.Instancia.ValidarTodo();
+                if (ok)
+                {
+                    lblEstadoIntegridad.Text = "Integridad: OK";
+                    lblEstadoIntegridad.ForeColor = Color.DarkGreen;
+                    lblEstadoIntegridad.Tag = null;
+                    _ultimoEstadoIntegridadOk = true;
+                }
+                else
+                {
+                    lblEstadoIntegridad.Text = "Integridad: Inconsistencias detectadas";
+                    lblEstadoIntegridad.ForeColor = Color.DarkRed;
+                    lblEstadoIntegridad.Tag = detalle;
+
+                    if (_ultimoEstadoIntegridadOk != false)
+                        RegistrarFallaIntegridad(detalle);
+                    _ultimoEstadoIntegridadOk = false;
+
+                    if (_puedeGestionarUsuarios || _puedeGestionarPermisos)
+                    {
+                        MessageBox.Show("Se detectaron inconsistencias de integridad:\n\n" + detalle,
+                            "Integridad", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                lblEstadoIntegridad.Text = "Integridad: error al verificar";
+                lblEstadoIntegridad.ForeColor = Color.DarkOrange;
+                lblEstadoIntegridad.Tag = ex.Message;
+                _ultimoEstadoIntegridadOk = null;
+            }
+        }
+
+        private void RegistrarFallaIntegridad(string detalle)
+        {
+            try
+            {
+                int? usuarioId = SessionManager.Instancia?.UsuarioActual?.Id;
+                new AuditoriaRepository().Registrar("INTEGRIDAD_FALLA", usuarioId, detalle);
+            }
+            catch
+            {
+                // No detener la experiencia del usuario si no se puede registrar la bitácora.
+            }
+        }
+
+        private void InicializarGestionPermisos()
+        {
+            CargarUsuariosConPermisos();
+            CargarRolesYPermisosDisponibles();
+            RefrescarPermisosAdministrables();
+        }
+
+        private void RefrescarPermisosAdministrables()
+        {
+            if (cmbPermisosExistentes == null)
+                return;
+
+            _permisosPlanos = BL.PermisoService.Instancia.ListarPermisos()
+                .OrderBy(p => p.Nombre)
+                .ToList();
+
+            var lista = _permisosPlanos
+                .Select(p => new BE.PermisoComposite { Id = p.Id, Nombre = p.Nombre, EsCompuesto = p.EsCompuesto })
+                .ToList();
+
+            cmbPermisosExistentes.DisplayMember = "Nombre";
+            cmbPermisosExistentes.ValueMember = "Id";
+            cmbPermisosExistentes.DataSource = lista;
+
+            var padres = _permisosPlanos
+                .Where(p => p.EsCompuesto)
+                .Select(p => new BE.PermisoComposite { Id = p.Id, Nombre = p.Nombre, EsCompuesto = p.EsCompuesto })
+                .ToList();
+
+            cmbPermisoPadre.DisplayMember = "Nombre";
+            cmbPermisoPadre.ValueMember = "Id";
+            cmbPermisoPadre.DataSource = padres;
+
+            cmbPermisoHijo.DisplayMember = "Nombre";
+            cmbPermisoHijo.ValueMember = "Id";
+            cmbPermisoHijo.DataSource = lista
+                .Select(p => new BE.PermisoComposite { Id = p.Id, Nombre = p.Nombre, EsCompuesto = p.EsCompuesto })
+                .ToList();
+
+            if (lista.Count > 0)
+                MostrarPermisoSeleccionado(lista.First().Id);
+            else
+            {
+                txtPermisoNombre.Clear();
+                chkPermisoEsCompuesto.Checked = false;
+            }
+        }
+
+        private void MostrarPermisoSeleccionado(int permisoId)
+        {
+            var permiso = _permisosPlanos.FirstOrDefault(p => p.Id == permisoId);
+            if (permiso == null)
+                return;
+
+            txtPermisoNombre.Text = permiso.Nombre;
+            chkPermisoEsCompuesto.Checked = permiso.EsCompuesto;
         }
 
         private void CargarUsuariosConPermisos()
@@ -732,6 +897,114 @@ namespace Proyecto_IS_Sistema_De_Tickets
             return tn;
         }
 
+        private void cmbPermisosExistentes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbPermisosExistentes.SelectedValue is int permisoId)
+            {
+                MostrarPermisoSeleccionado(permisoId);
+            }
+        }
+
+        private void btnCrearPermiso_Click(object sender, EventArgs e)
+        {
+            string nombre = txtNuevoPermisoNombre.Text.Trim();
+            bool esCompuesto = chkNuevoPermisoCompuesto.Checked;
+
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                MessageBox.Show("Ingresá un nombre de permiso.");
+                return;
+            }
+
+            try
+            {
+                int id = BL.PermisoService.Instancia.CrearPermiso(nombre, esCompuesto);
+                MessageBox.Show($"Permiso creado (Id={id}).");
+                txtNuevoPermisoNombre.Clear();
+                chkNuevoPermisoCompuesto.Checked = false;
+                RefrescarPermisosAdministrables();
+                CargarRolesYPermisosDisponibles();
+                CargarUsuariosConPermisos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al crear permiso: " + ex.Message);
+            }
+        }
+
+        private void btnActualizarPermiso_Click(object sender, EventArgs e)
+        {
+            if (!(cmbPermisosExistentes.SelectedValue is int permisoId))
+            {
+                MessageBox.Show("Seleccioná un permiso.");
+                return;
+            }
+
+            string nombre = txtPermisoNombre.Text.Trim();
+            bool esCompuesto = chkPermisoEsCompuesto.Checked;
+
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                MessageBox.Show("Ingresá un nombre válido.");
+                return;
+            }
+
+            try
+            {
+                BL.PermisoService.Instancia.ActualizarPermiso(permisoId, nombre, esCompuesto);
+                MessageBox.Show("Permiso actualizado.");
+                RefrescarPermisosAdministrables();
+                CargarRolesYPermisosDisponibles();
+                CargarUsuariosConPermisos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar permiso: " + ex.Message);
+            }
+        }
+
+        private void btnAgregarRelacionPermiso_Click(object sender, EventArgs e)
+        {
+            if (!(cmbPermisoPadre.SelectedValue is int padreId) || !(cmbPermisoHijo.SelectedValue is int hijoId))
+            {
+                MessageBox.Show("Seleccioná un permiso padre e hijo.");
+                return;
+            }
+
+            try
+            {
+                BL.PermisoService.Instancia.AsignarRelacion(padreId, hijoId);
+                MessageBox.Show("Relación creada.");
+                CargarRolesYPermisosDisponibles();
+                CargarUsuariosConPermisos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al relacionar permisos: " + ex.Message);
+            }
+        }
+
+        private void btnQuitarRelacionPermiso_Click(object sender, EventArgs e)
+        {
+            if (!(cmbPermisoPadre.SelectedValue is int padreId) || !(cmbPermisoHijo.SelectedValue is int hijoId))
+            {
+                MessageBox.Show("Seleccioná un permiso padre e hijo.");
+                return;
+            }
+
+            try
+            {
+                BL.PermisoService.Instancia.QuitarRelacion(padreId, hijoId);
+                MessageBox.Show("Relación eliminada.");
+                CargarRolesYPermisosDisponibles();
+                CargarUsuariosConPermisos();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al quitar la relación: " + ex.Message);
+            }
+        }
+
         private void btnAsignar_Click(object sender, EventArgs e)
         {
             if (treeUsuarios.SelectedNode == null || treeDisponibles.SelectedNode == null)
@@ -818,6 +1091,290 @@ namespace Proyecto_IS_Sistema_De_Tickets
 
         }
 
+        private void ConfigurarGrillaIdiomas()
+        {
+            if (dgvIdiomasAdmin == null || dgvIdiomasAdmin.Columns.Count > 0)
+                return;
+
+            dgvIdiomasAdmin.AutoGenerateColumns = false;
+            dgvIdiomasAdmin.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Id",
+                Name = "Id",
+                Visible = false
+            });
+            dgvIdiomasAdmin.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Codigo",
+                Name = "Codigo",
+                HeaderText = "Código",
+                Width = 80
+            });
+            dgvIdiomasAdmin.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Nombre",
+                Name = "Nombre",
+                HeaderText = "Nombre",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+            dgvIdiomasAdmin.Columns.Add(new DataGridViewCheckBoxColumn
+            {
+                DataPropertyName = "EsPorDefecto",
+                Name = "EsPorDefecto",
+                HeaderText = "Por defecto",
+                Width = 80
+            });
+        }
+
+        private void ConfigurarGrillaLeyendas()
+        {
+            if (dgvLeyendas == null || dgvLeyendas.Columns.Count > 0)
+                return;
+
+            dgvLeyendas.AutoGenerateColumns = false;
+            dgvLeyendas.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "EtiquetaId",
+                Name = "EtiquetaId",
+                Visible = false
+            });
+            dgvLeyendas.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Clave",
+                Name = "Clave",
+                HeaderText = "Clave",
+                Width = 120
+            });
+            dgvLeyendas.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Descripcion",
+                Name = "Descripcion",
+                HeaderText = "Descripción",
+                Width = 180
+            });
+            dgvLeyendas.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "Texto",
+                Name = "Texto",
+                HeaderText = "Texto",
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
+            });
+        }
+
+        private void CargarIdiomasAdmin()
+        {
+            if (dgvIdiomasAdmin == null)
+                return;
+
+            ConfigurarGrillaIdiomas();
+            ConfigurarGrillaLeyendas();
+
+            _idiomasAdmin.Clear();
+            _idiomasAdmin.AddRange(_idiomaSrv.ListarIdiomas());
+
+            dgvIdiomasAdmin.DataSource = null;
+            dgvIdiomasAdmin.DataSource = _idiomasAdmin
+                .Select(i => new BE.Idioma { Id = i.Id, Codigo = i.Codigo, Nombre = i.Nombre, EsPorDefecto = i.EsPorDefecto })
+                .ToList();
+
+            if (dgvIdiomasAdmin.Rows.Count > 0)
+            {
+                dgvIdiomasAdmin.Rows[0].Selected = true;
+                MostrarIdiomaSeleccionado();
+            }
+            else
+            {
+                lblIdiomaSeleccionadoAdmin.Tag = null;
+                txtIdiomaCodigo.ReadOnly = false;
+                txtIdiomaCodigo.Clear();
+                txtIdiomaNombre.Clear();
+                chkIdiomaPorDefecto.Checked = false;
+                dgvLeyendas.DataSource = null;
+            }
+        }
+
+        private void MostrarIdiomaSeleccionado()
+        {
+            if (dgvIdiomasAdmin?.CurrentRow == null)
+                return;
+
+            var cell = dgvIdiomasAdmin.CurrentRow.Cells["Id"];
+            if (cell == null || cell.Value == null)
+                return;
+
+            int idiomaId = Convert.ToInt32(cell.Value);
+            var idioma = _idiomasAdmin.FirstOrDefault(i => i.Id == idiomaId);
+            if (idioma == null)
+                return;
+
+            lblIdiomaSeleccionadoAdmin.Text = $"Idioma seleccionado: {idioma.Nombre}";
+            lblIdiomaSeleccionadoAdmin.Tag = idioma.Id;
+            txtIdiomaCodigo.Text = idioma.Codigo;
+            txtIdiomaCodigo.ReadOnly = true;
+            txtIdiomaNombre.Text = idioma.Nombre;
+            chkIdiomaPorDefecto.Checked = idioma.EsPorDefecto;
+
+            CargarLeyendasIdioma(idioma.Id);
+        }
+
+        private void CargarLeyendasIdioma(int idiomaId)
+        {
+            if (dgvLeyendas == null)
+                return;
+
+            ConfigurarGrillaLeyendas();
+            _leyendasActuales = _idiomaSrv.ListarLeyendas(idiomaId);
+
+            dgvLeyendas.DataSource = null;
+            dgvLeyendas.DataSource = _leyendasActuales
+                .Select(l => new
+                {
+                    l.EtiquetaId,
+                    l.Clave,
+                    l.Descripcion,
+                    l.Texto
+                }).ToList();
+
+            if (dgvLeyendas.Rows.Count > 0)
+            {
+                dgvLeyendas.Rows[0].Selected = true;
+                MostrarLeyendaSeleccionada();
+            }
+            else
+            {
+                txtLeyendaClave.Clear();
+                txtLeyendaDescripcion.Clear();
+                txtLeyendaTexto.Clear();
+            }
+        }
+
+        private void MostrarLeyendaSeleccionada()
+        {
+            if (dgvLeyendas?.CurrentRow == null)
+                return;
+
+            var row = dgvLeyendas.CurrentRow;
+            txtLeyendaClave.Text = row.Cells["Clave"].Value?.ToString() ?? string.Empty;
+            txtLeyendaDescripcion.Text = row.Cells["Descripcion"].Value?.ToString() ?? string.Empty;
+            txtLeyendaTexto.Text = row.Cells["Texto"].Value?.ToString() ?? string.Empty;
+        }
+
+        private void dgvIdiomasAdmin_SelectionChanged(object sender, EventArgs e)
+        {
+            MostrarIdiomaSeleccionado();
+        }
+
+        private void dgvLeyendas_SelectionChanged(object sender, EventArgs e)
+        {
+            MostrarLeyendaSeleccionada();
+        }
+
+        private void btnCrearIdioma_Click(object sender, EventArgs e)
+        {
+            string codigo = txtIdiomaCodigo.Text.Trim();
+            string nombre = txtIdiomaNombre.Text.Trim();
+            bool esPorDefecto = chkIdiomaPorDefecto.Checked;
+
+            if (string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(nombre))
+            {
+                MessageBox.Show("Completá código y nombre del idioma.");
+                return;
+            }
+
+            try
+            {
+                int nuevoId = _idiomaSrv.CrearIdioma(codigo, nombre, esPorDefecto);
+                MessageBox.Show($"Idioma creado (Id={nuevoId}).");
+                CargarIdiomasAdmin();
+                CargarSelectorIdiomas();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al crear el idioma: " + ex.Message);
+            }
+        }
+
+        private void btnActualizarIdioma_Click(object sender, EventArgs e)
+        {
+            if (!(lblIdiomaSeleccionadoAdmin.Tag is int idiomaId))
+            {
+                MessageBox.Show("Seleccioná un idioma de la lista.");
+                return;
+            }
+
+            string nombre = txtIdiomaNombre.Text.Trim();
+            bool esPorDefecto = chkIdiomaPorDefecto.Checked;
+
+            if (string.IsNullOrWhiteSpace(nombre))
+            {
+                MessageBox.Show("Ingresá un nombre válido.");
+                return;
+            }
+
+            try
+            {
+                _idiomaSrv.ActualizarIdioma(idiomaId, nombre, esPorDefecto);
+                MessageBox.Show("Idioma actualizado.");
+                CargarIdiomasAdmin();
+                CargarSelectorIdiomas();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar el idioma: " + ex.Message);
+            }
+        }
+
+        private void btnNuevoIdioma_Click(object sender, EventArgs e)
+        {
+            dgvIdiomasAdmin?.ClearSelection();
+            lblIdiomaSeleccionadoAdmin.Tag = null;
+            var ultima = IdiomaManager.Instancia.ObtenerUltimaTraduccion();
+            lblIdiomaSeleccionadoAdmin.Text = Texto(ultima, "LBL_IDIOMA_SELECCIONADO");
+            txtIdiomaCodigo.ReadOnly = false;
+            txtIdiomaCodigo.Clear();
+            txtIdiomaNombre.Clear();
+            chkIdiomaPorDefecto.Checked = false;
+            dgvLeyendas.DataSource = null;
+        }
+
+        private void btnGuardarLeyenda_Click(object sender, EventArgs e)
+        {
+            if (!(lblIdiomaSeleccionadoAdmin.Tag is int idiomaId))
+            {
+                MessageBox.Show("Seleccioná un idioma primero.");
+                return;
+            }
+
+            string clave = txtLeyendaClave.Text.Trim();
+            string descripcion = txtLeyendaDescripcion.Text.Trim();
+            string texto = txtLeyendaTexto.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(clave))
+            {
+                MessageBox.Show("Ingresá la clave de la leyenda.");
+                return;
+            }
+
+            try
+            {
+                _idiomaSrv.GuardarLeyenda(idiomaId, clave, descripcion, texto);
+                MessageBox.Show("Leyenda guardada.");
+                CargarLeyendasIdioma(idiomaId);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar la leyenda: " + ex.Message);
+            }
+        }
+
+        private void btnNuevaLeyenda_Click(object sender, EventArgs e)
+        {
+            txtLeyendaClave.Clear();
+            txtLeyendaDescripcion.Clear();
+            txtLeyendaTexto.Clear();
+            txtLeyendaClave.Focus();
+        }
+
        
 
         private void treeUsuarios_AfterSelect_1(object sender, TreeViewEventArgs e)
@@ -867,12 +1424,32 @@ namespace Proyecto_IS_Sistema_De_Tickets
             }
         }
 
-        private void button1_Click_1(object sender, EventArgs e)
+        private void btnVerificarIntegridad_Click(object sender, EventArgs e)
         {
-            BL.VerificadorIntegridadService.Instancia.RecalcularTodo();
+            ActualizarEstadoIntegridadVisual();
+        }
 
-            MessageBox.Show("Recalibrado completo");
+        private void btnRecalcularIntegridad_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                BL.VerificadorIntegridadService.Instancia.RecalcularTodo();
+                MessageBox.Show("Recalibrado completo");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al recalcular los dígitos: " + ex.Message);
+            }
 
+            ActualizarEstadoIntegridadVisual();
+        }
+
+        private void lblEstadoIntegridad_Click(object sender, EventArgs e)
+        {
+            if (lblEstadoIntegridad?.Tag is string detalle && !string.IsNullOrWhiteSpace(detalle))
+            {
+                MessageBox.Show(detalle, "Detalle de integridad", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private void treeDisponibles_AfterSelect(object sender, TreeViewEventArgs e)
