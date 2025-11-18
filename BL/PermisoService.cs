@@ -140,6 +140,51 @@ namespace BL
             _permisoDao.QuitarPermisoARol(rolId, permisoId);
         }
 
+        /// <summary>
+        /// Lista plana de permisos para interfaces administrativas.
+        /// </summary>
+        public List<PermisoComposite> ListarPermisos()
+        {
+            return _permisoDao.GetAllPermisos();
+        }
+
+        public int CrearPermiso(string nombre, bool esCompuesto)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre es obligatorio.", nameof(nombre));
+
+            return _permisoDao.CrearPermiso(nombre.Trim(), esCompuesto);
+        }
+
+        public void ActualizarPermiso(int id, string nombre, bool esCompuesto)
+        {
+            if (id <= 0) throw new ArgumentException("Id inválido", nameof(id));
+            if (string.IsNullOrWhiteSpace(nombre))
+                throw new ArgumentException("El nombre es obligatorio.", nameof(nombre));
+
+            _permisoDao.ActualizarPermiso(id, nombre.Trim(), esCompuesto);
+        }
+
+        public void AsignarRelacion(int padreId, int hijoId)
+        {
+            if (padreId <= 0 || hijoId <= 0)
+                throw new ArgumentException("Los permisos deben ser válidos.");
+            if (padreId == hijoId)
+                throw new InvalidOperationException("Un permiso no puede ser padre de sí mismo.");
+
+            _permisoDao.AsignarHijo(padreId, hijoId);
+        }
+
+        public void QuitarRelacion(int padreId, int hijoId)
+        {
+            if (padreId <= 0 || hijoId <= 0)
+                throw new ArgumentException("Los permisos deben ser válidos.");
+            if (padreId == hijoId)
+                throw new InvalidOperationException("Los permisos deben ser distintos.");
+
+            _permisoDao.QuitarHijo(padreId, hijoId);
+        }
+
         #region Helpers
 
         private (Dictionary<int, PermisoComposite> Permisos, Dictionary<int, List<int>> HijosPorPadre) CargarEstructuras()

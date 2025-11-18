@@ -122,6 +122,75 @@ namespace DAO
                 cmd.ExecuteNonQuery();
             }
         }
+
+        /// <summary>
+        /// Crea un nuevo permiso y devuelve el Id generado.
+        /// </summary>
+        public int CrearPermiso(string nombre, bool esCompuesto)
+        {
+            using (var cn = GetConnection())
+            using (var cmd = new SqlCommand(@"INSERT INTO Permiso (Permiso_Nombre, EsCompuesto)
+                                           VALUES (@nom, @comp);
+                                           SELECT CAST(SCOPE_IDENTITY() AS INT);", cn))
+            {
+                cmd.Parameters.AddWithValue("@nom", nombre);
+                cmd.Parameters.AddWithValue("@comp", esCompuesto);
+                cn.Open();
+                return (int)cmd.ExecuteScalar();
+            }
+        }
+
+        /// <summary>
+        /// Actualiza los datos básicos de un permiso existente.
+        /// </summary>
+        public void ActualizarPermiso(int id, string nombre, bool esCompuesto)
+        {
+            using (var cn = GetConnection())
+            using (var cmd = new SqlCommand(
+                "UPDATE Permiso SET Permiso_Nombre = @nom, EsCompuesto = @comp WHERE Permiso_Id = @id;",
+                cn))
+            {
+                cmd.Parameters.AddWithValue("@nom", nombre);
+                cmd.Parameters.AddWithValue("@comp", esCompuesto);
+                cmd.Parameters.AddWithValue("@id", id);
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Define una relación padre-hijo entre permisos compuestos.
+        /// </summary>
+        public void AsignarHijo(int padreId, int hijoId)
+        {
+            using (var cn = GetConnection())
+            using (var cmd = new SqlCommand(@"IF NOT EXISTS (SELECT 1 FROM PermisoHijo WHERE PermisoPadre_Id = @padre AND PermisoHijo_Id = @hijo)
+                                           INSERT INTO PermisoHijo (PermisoPadre_Id, PermisoHijo_Id)
+                                           VALUES (@padre, @hijo);", cn))
+            {
+                cmd.Parameters.AddWithValue("@padre", padreId);
+                cmd.Parameters.AddWithValue("@hijo", hijoId);
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Quita una relación padre-hijo existente.
+        /// </summary>
+        public void QuitarHijo(int padreId, int hijoId)
+        {
+            using (var cn = GetConnection())
+            using (var cmd = new SqlCommand(
+                "DELETE FROM PermisoHijo WHERE PermisoPadre_Id = @padre AND PermisoHijo_Id = @hijo;",
+                cn))
+            {
+                cmd.Parameters.AddWithValue("@padre", padreId);
+                cmd.Parameters.AddWithValue("@hijo", hijoId);
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }
 

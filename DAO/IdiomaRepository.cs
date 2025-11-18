@@ -49,5 +49,61 @@ namespace DAO
             }
             return (0, null, null);
         }
+
+        public int CrearIdioma(string codigo, string nombre, bool esPorDefecto)
+        {
+            using (var cn = GetConnection())
+            {
+                cn.Open();
+                using (var tx = cn.BeginTransaction())
+                {
+                    if (esPorDefecto)
+                    {
+                        using (var cmdReset = new SqlCommand("UPDATE Idioma SET EsPorDefecto = 0;", cn, tx))
+                            cmdReset.ExecuteNonQuery();
+                    }
+
+                    using (var cmd = new SqlCommand(@"INSERT INTO Idioma (Codigo, Nombre, EsPorDefecto)
+                                                  VALUES (@cod, @nom, @def);
+                                                  SELECT CAST(SCOPE_IDENTITY() AS INT);", cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@cod", codigo);
+                        cmd.Parameters.AddWithValue("@nom", nombre);
+                        cmd.Parameters.AddWithValue("@def", esPorDefecto);
+                        var nuevoId = (int)cmd.ExecuteScalar();
+                        tx.Commit();
+                        return nuevoId;
+                    }
+                }
+            }
+        }
+
+        public void ActualizarIdioma(int id, string nombre, bool esPorDefecto)
+        {
+            using (var cn = GetConnection())
+            {
+                cn.Open();
+                using (var tx = cn.BeginTransaction())
+                {
+                    if (esPorDefecto)
+                    {
+                        using (var cmdReset = new SqlCommand("UPDATE Idioma SET EsPorDefecto = 0;", cn, tx))
+                            cmdReset.ExecuteNonQuery();
+                    }
+
+                    using (var cmd = new SqlCommand(
+                        "UPDATE Idioma SET Nombre = @nom, EsPorDefecto = @def WHERE IdIdioma = @id;",
+                        cn, tx))
+                    {
+                        cmd.Parameters.AddWithValue("@nom", nombre);
+                        cmd.Parameters.AddWithValue("@def", esPorDefecto);
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    tx.Commit();
+                }
+            }
+        }
     }
 }
